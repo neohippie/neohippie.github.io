@@ -9,8 +9,8 @@
     
     <style>
         body { 
-            margin: 0; 
-            overflow: hidden; 
+            margin          : 0; 
+            overflow        : hidden; 
             background-color: #bfd1e5; 
         }
     </style>
@@ -19,15 +19,17 @@
 <body>
     <div id="container"><br /><br /><br /><br /><br />L O A D I N G</div>
 
-    <script src="js/three.js">                 </script>
-    <script src="js/controls/OrbitControls.js"></script>
-    <script src="js/ImprovedNoise.js">         </script>
-    <script src="js/Mirror.js">                </script>
-    <script src="js/WaterShader.js">           </script>
-    <script src="js/Detector.js">              </script>
-        
+    <script src="js/lib/three.js/three.js">        </script>
+    <script src="js/lib/three.js/OrbitControls.js"></script>
+    <script src="js/lib/three.js/ImprovedNoise.js"></script>
+    <script src="js/lib/three.js/Mirror.js">       </script>
+    <script src="js/lib/three.js/WaterShader.js">  </script>
+    <script src="js/lib/three.js/Detector.js">     </script>
+    
+    <script src="js/loadTextures.js">              </script>
+    
     <script>
-        
+    
         if (!Detector.webgl) {
             Detector.addGetWebGLMessage();
             document.getElementById('container').innerHTML = "";
@@ -36,15 +38,22 @@
         var container;
         var camera, scene, renderer;
         var mesh, texture;
-        var waterNormals;
         
         var worldWidth = 256, worldDepth = 256,
             worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
             
-        init();
-        animate();
+        var textureAssets = [
+            { property: 'waterNormals', file: 'textures/waternormals.jpg' },
+            { property: 'heightMap'   , file: 'textures/heightmap.jpg'    }
+        ];
+            
+        loadTextures(textureAssets, function(textures) {
+            init(textures);
+            animate();
+        });
         
-        function init() {
+        function init(textures) {
+        
             container = document.getElementById('container');
             
             renderer = new THREE.WebGLRenderer();
@@ -88,13 +97,12 @@
                 vertices[ j + 1 ] = data[ i ] * 10;
             }            
 
-            waterNormals = new THREE.TextureLoader().load( 'textures/waternormals.jpg' );
-            waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+            textures.waterNormals.wrapS = textures.waterNormals.wrapT = THREE.RepeatWrapping;
 
             water = new THREE.Water( renderer, camera, scene, {
                 textureWidth: 256,
                 textureHeight: 256,
-                waterNormals: waterNormals,
+                waterNormals: textures.waterNormals,
                 alpha: 	1.0,
                 sunDirection: light.position.clone().normalize(),
                 sunColor: 0xffffff,
