@@ -13,15 +13,16 @@
             overflow        : hidden; 
             background-color: #bfd1e5; 
         }
+        #canvas { display: none; }
     </style>
 </head>
 
 <body>
     <div id="container"><br /><br /><br /><br /><br />L O A D I N G</div>
+    <canvas id="canvas"></canvas>
 
     <script src="js/lib/three.js/three.js">        </script>
     <script src="js/lib/three.js/OrbitControls.js"></script>
-    <script src="js/lib/three.js/ImprovedNoise.js"></script>
     <script src="js/lib/three.js/Mirror.js">       </script>
     <script src="js/lib/three.js/WaterShader.js">  </script>
     <script src="js/lib/three.js/Detector.js">     </script>
@@ -35,9 +36,7 @@
             document.getElementById('container').innerHTML = "";
         }
         
-        var container;
-        var camera, scene, renderer;
-        var mesh, texture;
+        var camera, scene, renderer, water;
         
         var worldWidth = 256, worldDepth = 256,
             worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
@@ -54,7 +53,7 @@
         
         function init(textures) {
         
-            container = document.getElementById('container');
+            var container = document.getElementById('container');
             
             renderer = new THREE.WebGLRenderer();
             renderer.setClearColor( 0xbfd1e5 );
@@ -63,8 +62,6 @@
             
             container.innerHTML = "";
             container.appendChild(renderer.domElement);
-            
-            data = generateHeight(worldWidth, worldDepth);
             
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 20000);
             camera.position.set( 2000, 5000, 2000 );
@@ -80,38 +77,39 @@
             
             // light
             
-            var light = new THREE.DirectionalLight( 0xffffbb, 1 );
-            light.position.set( - 1, 1, - 1 );
+            var light = new THREE.DirectionalLight(0xffffbb, 1);
+            light.position.set(-1, 1, -1);
             
             scene.add(light);
             scene.add(new THREE.AmbientLight(0x444444));
             
             // water
 
-            var geometry = new THREE.PlaneBufferGeometry( 7500, 7500, worldWidth - 1, worldDepth - 1 );
-            geometry.rotateX( - Math.PI / 2 );
+            var geometry = new THREE.PlaneBufferGeometry(7500, 7500, worldWidth-1, worldDepth-1);
+            geometry.rotateX(-Math.PI/2);
 
+            var data     = loadHeight(textures.heightMap.image)
             var vertices = geometry.attributes.position.array;
 
-            for ( var i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3 ) {
-                vertices[ j + 1 ] = data[ i ] * 10;
+            for (var i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3) {
+                vertices[j+1] = data[i] * 10;
             }            
 
             textures.waterNormals.wrapS = textures.waterNormals.wrapT = THREE.RepeatWrapping;
 
-            water = new THREE.Water( renderer, camera, scene, {
-                textureWidth: 256,
+            water = new THREE.Water(renderer, camera, scene, {
+                textureWidth:  256,
                 textureHeight: 256,
                 waterNormals: textures.waterNormals,
                 alpha: 	1.0,
                 sunDirection: light.position.clone().normalize(),
-                sunColor: 0xffffff,
+                sunColor:   0xffffff,
                 waterColor: 0x001e0f,
                 distortionScale: 50.0,
                 fog: scene.fog != undefined
             } );
 
-            mesh = new THREE.Mesh(geometry, water.material);
+            var mesh = new THREE.Mesh(geometry, water.material);
             mesh.position.set(-5000, -10000, -5000);
             mesh.add(water);
             
@@ -127,22 +125,23 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
         
-        function generateHeight(width, height) {
-
-            var size = width * height, data = new Uint8Array( size ),
-            perlin = new ImprovedNoise(), quality = 1, z = Math.random() * 100;
-
-            for ( var j = 0; j < 4; j ++ ) {
+        function loadHeight(img) {
+            var canvas  = document.getElementById("canvas");
+            var context = canvas.getContext('2d');
             
-                for ( var i = 0; i < size; i ++ ) {
-                
-                    var x = i % width, y = ~~ ( i / width );
-                    data[ i ] += Math.abs( perlin.noise( x / quality, y / quality, z ) * quality * 1.75 );
-                }
-                quality *= 5;
+            canvas.width  = img.width;
+            canvas.height = img.height;
+            
+            context.drawImage(img, 0, 0, img.width, img.height);
+            
+            var data = context.getImageData(0, 0, img.height, img.width).data;
+            var normPixels = []
+
+            for (var i = 0, n = data.length; i < n; i += 4) {
+                normPixels.push((data[i] + data[i+1] + data[i+2]) / 3);
             }
             
-            return data;
+            return normPixels;
         }
         
         function animate() {
