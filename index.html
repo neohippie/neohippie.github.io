@@ -31,7 +31,10 @@
             Detector.addGetWebGLMessage();
         }
         
-        var camera, scene, renderer, water, water2;
+        window.addEventListener('resize', onWindowResize, false);
+        
+        var camera, scene, renderer;
+        var textWater, oceanWater;
         
         var worldWidth = 256, worldDepth = 256,
             worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
@@ -39,7 +42,7 @@
         var textureAssets = [
             { property: 'waterNormals', file: 'textures/waternormals.jpg'       },
             { property: 'heightMap'   , file: 'textures/heightmap.jpg'          },
-            { property: 'skybox'      , file: 'textures/skybox_la_night.png' }
+            { property: 'skybox'      , file: 'textures/skybox_la_night.png'    }
         ];
             
         loadTextures(textureAssets, function(textures) {
@@ -53,13 +56,12 @@
             document.body.appendChild(container);
             
             renderer = new THREE.WebGLRenderer();
-            renderer.setPixelRatio( window.devicePixelRatio );
-            renderer.setSize( window.innerWidth, window.innerHeight );
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
             
             container.appendChild(renderer.domElement);
             
-            camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.5, 3000000 );
-            //camera.position.set(0, 1, 0);
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 3000000);
             
             controls = new THREE.OrbitControls( camera, renderer.domElement );
             controls.enablePan = false;
@@ -70,21 +72,21 @@
             
             scene = new THREE.Scene();
             
-            // water
+            // text
 
-            var geometry = new THREE.PlaneBufferGeometry(20000, 20000, worldWidth-1, worldDepth-1);
-            geometry.rotateX(-Math.PI/2);
+            var textGeometry = new THREE.PlaneBufferGeometry(20000, 20000, worldWidth-1, worldDepth-1);
+            textGeometry.rotateX(-Math.PI/2);
 
-            var data     = loadHeight(textures.heightMap.image)
-            var vertices = geometry.attributes.position.array;
+            var textData     = loadHeight(textures.heightMap.image)
+            var textVertices = textGeometry.attributes.position.array;
 
-            for (var i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3) {
-                vertices[j+1] = data[i] * 10;
+            for (var i = 0, j = 0, l = textVertices.length; i < l; i ++, j += 3) {
+                textVertices[j+1] = textData[i] * 10;
             }            
 
             textures.waterNormals.wrapS = textures.waterNormals.wrapT = THREE.RepeatWrapping;
 
-            water = new THREE.Water(renderer, camera, scene, {
+            textWater = new THREE.Water(renderer, camera, scene, {
                 textureWidth:  256,
                 textureHeight: 256,
                 waterNormals: textures.waterNormals,
@@ -96,14 +98,16 @@
                 fog: scene.fog != undefined
             });
 
-            var mesh = new THREE.Mesh(geometry, water.material);
-            mesh.position.set(3000, -8300, 3000);
-            mesh.rotateY(-Math.PI/1.5);
-            mesh.add(water);
+            var textMesh = new THREE.Mesh(textGeometry, textWater.material);
+            textMesh.position.set(3000, -8300, 3000);
+            textMesh.rotateY(-Math.PI/1.5);
+            textMesh.add(textWater);
             
-            scene.add(mesh);
+            scene.add(textMesh);
             
-            water2 = new THREE.Water(renderer, camera, scene, {
+            // ocean
+            
+            oceanWater = new THREE.Water(renderer, camera, scene, {
                 textureWidth:  1024,
                 textureHeight: 1024,
                 waterNormals: textures.waterNormals,
@@ -115,45 +119,46 @@
                 fog: scene.fog != undefined
             });
             
-            mirrorMesh = new THREE.Mesh(
-                new THREE.PlaneBufferGeometry( 2000 * 500, 2000 * 500 ),
-                water2.material
+            oceanMesh = new THREE.Mesh(
+                new THREE.PlaneBufferGeometry(1000000, 1000000),
+                oceanWater.material
             );
 
-            mirrorMesh.add( water2 );
-            mirrorMesh.position.set(0, -6000, 0);
-            mirrorMesh.rotation.x = - Math.PI * 0.5;
-            scene.add( mirrorMesh );
+            oceanMesh.add(oceanWater);
+            oceanMesh.position.set(0, -6000, 0);
+            oceanMesh.rotation.x = -Math.PI * 0.5;
+            
+            scene.add(oceanMesh);
             
             // skybox
 
             var cubeMap = new THREE.CubeTexture( [] );
             cubeMap.format = THREE.RGBFormat;
 
-            var getSide = function ( x, y ) {
-
+            var getSide = function (x, y) {
                 var size = 1024;
-
                 var canvas = document.createElement('canvas');
+                
                 canvas.width  = size;
                 canvas.height = size;
                 
-                var context = canvas.getContext( '2d' );
-                context.drawImage( textures.skybox.image, - x * size, - y * size );
+                var context = canvas.getContext('2d');
+                context.drawImage(textures.skybox.image, -x * size, -y * size);
 
                 return canvas;
             };
 
-            cubeMap.images[ 0 ] = getSide( 2, 1 ); // px
-            cubeMap.images[ 1 ] = getSide( 0, 1 ); // nx
-            cubeMap.images[ 2 ] = getSide( 1, 0 ); // py
-            cubeMap.images[ 3 ] = getSide( 1, 2 ); // ny
-            cubeMap.images[ 4 ] = getSide( 1, 1 ); // pz
-            cubeMap.images[ 5 ] = getSide( 3, 1 ); // nz
+            cubeMap.images[0] = getSide(2, 1); // px
+            cubeMap.images[1] = getSide(0, 1); // nx
+            cubeMap.images[2] = getSide(1, 0); // py
+            cubeMap.images[3] = getSide(1, 2); // ny
+            cubeMap.images[4] = getSide(1, 1); // pz
+            cubeMap.images[5] = getSide(3, 1); // nz
+            
             cubeMap.needsUpdate = true;
           
-            var cubeShader = THREE.ShaderLib[ 'cube' ];
-            cubeShader.uniforms[ 'tCube' ].value = cubeMap;
+            var cubeShader = THREE.ShaderLib['cube'];
+            cubeShader.uniforms['tCube'].value = cubeMap;
 
             var skyBoxMaterial = new THREE.ShaderMaterial( {
                 fragmentShader: cubeShader.fragmentShader,
@@ -161,16 +166,14 @@
                 uniforms: cubeShader.uniforms,
                 depthWrite: false,
                 side: THREE.BackSide
-            } );
+            });
 
             var skyBox = new THREE.Mesh(
-                new THREE.BoxGeometry( 1000000, 1000000, 1000000 ),
+                new THREE.BoxGeometry(1000000, 1000000, 1000000),
                 skyBoxMaterial
             );
 
-            scene.add( skyBox );
-
-            window.addEventListener('resize', onWindowResize, false);
+            scene.add(skyBox);
         }
         
         function onWindowResize() {
@@ -205,11 +208,14 @@
         }
 
         function render() {
-            water.material.uniforms.time.value += 1.0 / 60.0;
-            water2.material.uniforms.time.value += 1.0 / 60.0;
+            textWater .material.uniforms.time.value += 1.0 / 60.0;
+            oceanWater.material.uniforms.time.value += 1.0 / 60.0;
+            
             controls.update();
-            water.render();
-            water2.render();
+            
+            textWater .render();
+            oceanWater.render();
+            
             renderer.render(scene, camera);
         }
         
