@@ -21,6 +21,7 @@
     <script src="js/lib/three.js/OrbitControls.js"></script>
     <script src="js/lib/three.js/Mirror.js">       </script>
     <script src="js/lib/three.js/WaterShader.js">  </script>
+    <script src="js/lib/three.js/OBJLoader.js">    </script>
     <script src="js/lib/three.js/Detector.js">     </script>
     
     <script src="js/loadTextures.js">              </script>
@@ -113,8 +114,8 @@
                 waterNormals: textures.waterNormals,
                 alpha: 	1.0,
                 sunDirection: new THREE.Vector3(-1, 1, -1).normalize(),
-                sunColor:   0xffffff,
-                waterColor: 0x000000,
+                sunColor:   0xff9933,
+                waterColor: 0x001e0f,
                 distortionScale: 50.0,
                 fog: scene.fog != undefined
             });
@@ -130,9 +131,25 @@
             
             scene.add(oceanMesh);
             
+            var urls = [
+                'textures/SunSetLeft2048.png', 'textures/SunSetRight2048.png',
+                'textures/SunSetUp2048.png'  , 'textures/SunSetDown2048.png' ,
+                'textures/SunSetFront2048.png', 'textures/SunSetBack2048.png',
+            ];
+
+            var cubeMap = new THREE.CubeTextureLoader().load(urls);
+            cubeMap.format = THREE.RGBFormat;
+            
+            var objLoader = new THREE.OBJLoader();
+            objLoader.load('models/TheCity.obj', function (model) {
+                model.scale.set(100, 100, 100);
+                model.position.set(1000000, -10000, 0);
+                scene.add(model);
+            });
+            
             // skybox
 
-            var cubeMap = new THREE.CubeTexture( [] );
+            /*var cubeMap = new THREE.CubeTexture( [] );
             cubeMap.format = THREE.RGBFormat;
 
             var getSide = function (x, y) {
@@ -153,7 +170,7 @@
             cubeMap.images[2] = getSide(1, 0); // py
             cubeMap.images[3] = getSide(1, 2); // ny
             cubeMap.images[4] = getSide(1, 1); // pz
-            cubeMap.images[5] = getSide(3, 1); // nz
+            cubeMap.images[5] = getSide(3, 1); // nz*/
             
             cubeMap.needsUpdate = true;
           
