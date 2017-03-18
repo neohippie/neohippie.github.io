@@ -35,15 +35,15 @@
         window.addEventListener('resize', onWindowResize, false);
         
         var camera, scene, renderer;
-        var textWater, oceanWater;
+        var oceanWater;
         
         var worldWidth = 256, worldDepth = 256,
             worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
             
         var textureAssets = [
             { property: 'waterNormals', file: 'textures/waternormals.jpg'       },
-            { property: 'heightMap'   , file: 'textures/heightmap.jpg'          },
-            { property: 'skybox'      , file: 'textures/skybox_la_night.png'    }
+            { property: 'heightMap'   , file: 'textures/island_heightmap.jpg'   },
+            { property: 'sand'        , file: 'textures/sand.png'               }
         ];
             
         loadTextures(textureAssets, function(textures) {
@@ -63,6 +63,7 @@
             container.appendChild(renderer.domElement);
             
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 3000000);
+            camera.position.set(980.6899010596237, 29.60587836256858, -193.4658152822133);
             
             controls = new THREE.OrbitControls( camera, renderer.domElement );
             controls.enablePan = false;
@@ -73,48 +74,52 @@
             
             scene = new THREE.Scene();
             
-            // text
+            // light
 
-            var textGeometry = new THREE.PlaneBufferGeometry(20000, 20000, worldWidth-1, worldDepth-1);
-            textGeometry.rotateX(-Math.PI/2);
-
-            var textData     = loadHeight(textures.heightMap.image)
-            var textVertices = textGeometry.attributes.position.array;
-
-            for (var i = 0, j = 0, l = textVertices.length; i < l; i ++, j += 3) {
-                textVertices[j+1] = textData[i] * 10;
-            }            
-
-            textures.waterNormals.wrapS = textures.waterNormals.wrapT = THREE.RepeatWrapping;
-
-            textWater = new THREE.Water(renderer, camera, scene, {
-                textureWidth:  256,
-                textureHeight: 256,
-                waterNormals: textures.waterNormals,
-                alpha: 	0.8,
-                sunDirection: new THREE.Vector3(1, 1, 1).normalize(),
-                sunColor:   0xff9900,
-                waterColor: 0xffffff,
-                distortionScale: 50.0,
-                fog: scene.fog != undefined
-            });
-
-            var textMesh = new THREE.Mesh(textGeometry, textWater.material);
-            textMesh.position.set(3000, -8300, 3000);
-            textMesh.rotateY(-Math.PI/1.5);
-            textMesh.add(textWater);
+            var sun = new THREE.DirectionalLight(0xff9933, 1);
+            sun.position.set(-21500, 1000, -10000);
             
-            scene.add(textMesh);
+            scene.add(sun);
+            scene.add(new THREE.AmbientLight(0x444444));
+            
+            /*var geometry = new THREE.BoxGeometry(100, 100, 100 ;
+            var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+            var cube     = new THREE.Mesh(geometry, material);
+            cube.position.set(-21500, 1000, -10000);
+            scene.add(cube);*/
+            
+            // island
+
+            var islandGeometry = new THREE.PlaneBufferGeometry(50000, 50000, worldWidth-1, worldDepth-1);
+            islandGeometry.rotateX(-Math.PI/2);
+
+            var islandData     = loadHeight(textures.heightMap.image)
+            var islandVertices = islandGeometry.attributes.position.array;
+
+            for (var i = 0, j = 0, l = islandVertices.length; i < l; i ++, j += 3) {
+                islandVertices[j+1] = islandData[i] * 10;
+            }                        
+
+            textures.sand.wrapS    = textures.sand.wrapT    = THREE.RepeatWrapping;
+            textures.sand.repeat.x = textures.sand.repeat.y = 3;
+
+            var islandMesh = new THREE.Mesh(islandGeometry, new THREE.MeshLambertMaterial( { map: textures.sand } ));
+            islandMesh.position.set(-20000, -6200, 0);
+            islandMesh.rotateY(-Math.PI/1.5);
+            
+            scene.add(islandMesh);
             
             // ocean
+            
+            textures.waterNormals.wrapS = textures.waterNormals.wrapT = THREE.RepeatWrapping;
             
             oceanWater = new THREE.Water(renderer, camera, scene, {
                 textureWidth:  1024,
                 textureHeight: 1024,
                 waterNormals: textures.waterNormals,
                 alpha: 	1.0,
-                sunDirection: new THREE.Vector3(-1, 1, -1).normalize(),
-                sunColor:   0xff9933,
+                sunDirection: sun.position.clone().normalize(),
+                sunColor:     sun.color,
                 waterColor: 0x001e0f,
                 distortionScale: 50.0,
                 fog: scene.fog != undefined
@@ -131,47 +136,17 @@
             
             scene.add(oceanMesh);
             
+            // skybox
+            
             var urls = [
-                'textures/SunSetLeft2048.png', 'textures/SunSetRight2048.png',
-                'textures/SunSetUp2048.png'  , 'textures/SunSetDown2048.png' ,
-                'textures/SunSetFront2048.png', 'textures/SunSetBack2048.png',
+                'textures/SunSetLeft2048.png' , 'textures/SunSetRight2048.png',
+                'textures/SunSetUp2048.png'   , 'textures/SunSetDown2048.png' ,
+                'textures/SunSetFront2048.png', 'textures/SunSetBack2048.png'
             ];
 
             var cubeMap = new THREE.CubeTextureLoader().load(urls);
-            cubeMap.format = THREE.RGBFormat;
             
-            var objLoader = new THREE.OBJLoader();
-            objLoader.load('models/TheCity.obj', function (model) {
-                model.scale.set(100, 100, 100);
-                model.position.set(1000000, -10000, 0);
-                scene.add(model);
-            });
-            
-            // skybox
-
-            /*var cubeMap = new THREE.CubeTexture( [] );
-            cubeMap.format = THREE.RGBFormat;
-
-            var getSide = function (x, y) {
-                var size = 1024;
-                var canvas = document.createElement('canvas');
-                
-                canvas.width  = size;
-                canvas.height = size;
-                
-                var context = canvas.getContext('2d');
-                context.drawImage(textures.skybox.image, -x * size, -y * size);
-
-                return canvas;
-            };
-
-            cubeMap.images[0] = getSide(2, 1); // px
-            cubeMap.images[1] = getSide(0, 1); // nx
-            cubeMap.images[2] = getSide(1, 0); // py
-            cubeMap.images[3] = getSide(1, 2); // ny
-            cubeMap.images[4] = getSide(1, 1); // pz
-            cubeMap.images[5] = getSide(3, 1); // nz*/
-            
+            cubeMap.format      = THREE.RGBFormat;
             cubeMap.needsUpdate = true;
           
             var cubeShader = THREE.ShaderLib['cube'];
@@ -191,6 +166,17 @@
             );
 
             scene.add(skyBox);
+            
+            // city
+            
+            var objLoader = new THREE.OBJLoader();
+            
+            objLoader.load('models/la_osm.obj', function (model) {
+                model.scale   .set(  10000,  10000,   10000);
+                model.position.set(-900000, -10000, 1000000);
+                
+                scene.add(model);
+            });
         }
         
         function onWindowResize() {
@@ -225,15 +211,12 @@
         }
 
         function render() {
-            textWater .material.uniforms.time.value += 1.0 / 60.0;
             oceanWater.material.uniforms.time.value += 1.0 / 60.0;
             
             controls.update();
             
-            textWater .render();
             oceanWater.render();
-            
-            renderer.render(scene, camera);
+            renderer  .render(scene, camera);
         }
         
     </script>
