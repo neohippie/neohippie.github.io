@@ -36,6 +36,7 @@
         
         var camera, scene, renderer;
         var oceanWater;
+        var islandGeometry, islandVertices, islandClone;
         
         var worldWidth = 256, worldDepth = 256,
             worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
@@ -90,20 +91,29 @@
             
             // island
 
-            var islandGeometry = new THREE.PlaneBufferGeometry(50000, 50000, worldWidth-1, worldDepth-1);
+            islandGeometry = new THREE.PlaneBufferGeometry(50000, 50000, worldWidth-1, worldDepth-1);
             islandGeometry.rotateX(-Math.PI/2);
 
-            var islandData     = loadHeight(textures.heightMap.image)
-            var islandVertices = islandGeometry.attributes.position.array;
+            var islandData = loadHeight(textures.heightMap.image)
+            islandVertices = islandGeometry.attributes.position.array;
 
-            for (var i = 0, j = 0, l = islandVertices.length; i < l; i ++, j += 3) {
-                islandVertices[j+1] = islandData[i] * 10;
-            }                        
+            for (var i = 0, j = 0, l = islandVertices.length; i < l; i++, j += 3) {
+                islandVertices[j+1] = islandData[i] * 10.0;
+            }
+            
+            islandClone = islandVertices.slice();
 
             textures.sand.wrapS    = textures.sand.wrapT    = THREE.RepeatWrapping;
             textures.sand.repeat.x = textures.sand.repeat.y = 3;
+            
+            var islandMaterial = new THREE.MeshLambertMaterial( { 
+                map: textures.sand, 
+                polygonOffset: true,
+                polygonOffsetFactor: -4 
+            });
 
-            var islandMesh = new THREE.Mesh(islandGeometry, new THREE.MeshLambertMaterial( { map: textures.sand } ));
+            var islandMesh = new THREE.Mesh(islandGeometry, islandMaterial);
+            
             islandMesh.position.set(-20000, -6200, 0);
             islandMesh.rotateY(-Math.PI/1.5);
             
@@ -117,7 +127,7 @@
                 textureWidth:  1024,
                 textureHeight: 1024,
                 waterNormals: textures.waterNormals,
-                alpha: 	1.0,
+                alpha: 	0.7,
                 sunDirection: sun.position.clone().normalize(),
                 sunColor:     sun.color,
                 waterColor: 0x001e0f,
@@ -210,10 +220,33 @@
             render();
         }
 
+        var WATER_LEVEL = 400.0;
+        var WATER_RATE  = 0.01;
+
         function render() {
+                        
+            for (var i = 0, j = 0; i < islandVertices.length; i++, j += 3) {
+            
+                var curLevel  = islandVertices[j+1];
+                var baseLevel = islandClone   [j+1];
+                
+                if (baseLevel <= WATER_LEVEL && baseLevel > 0) {
+                    
+                    var test = Math.sin(i - performance.now()*0.01)
+                        + Math.sin(Math.PI*2 * performance.now()*0.001 - Math.PI/2) * (WATER_LEVEL/baseLevel)
+                        * WATER_LEVEL/baseLevel;
+                    
+                    if (curLevel+test < baseLevel) {
+                        islandVertices[j+1] += test;
+                    }
+                }
+            }
+            
+            islandGeometry.attributes.position.needsUpdate = true;
             oceanWater.material.uniforms.time.value += 1.0 / 60.0;
             
             controls.update();
+            renderer.clear();
             
             oceanWater.render();
             renderer  .render(scene, camera);
