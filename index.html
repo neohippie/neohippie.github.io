@@ -221,10 +221,11 @@
         }
 
         var WATER_LEVEL = 400.0;
-        var WATER_RATE  = 0.01;
+        var WATER_RATE  = 0.001;
 
         function render() {
-                        
+            
+            // simulate tide by lowering edges of island
             for (var i = 0, j = 0; i < islandVertices.length; i++, j += 3) {
             
                 var curLevel  = islandVertices[j+1];
@@ -232,9 +233,11 @@
                 
                 if (baseLevel <= WATER_LEVEL && baseLevel > 0) {
                     
-                    var test = Math.sin(i - performance.now()*0.01)
-                        + Math.sin(Math.PI*2 * performance.now()*0.001 - Math.PI/2) * (WATER_LEVEL/baseLevel)
-                        * WATER_LEVEL/baseLevel;
+                    var theta     = WATER_RATE  * performance.now();
+                    var amplitude = WATER_LEVEL / baseLevel;
+                    
+                    var test = Math.sin  (theta)            * amplitude
+                       +  (1 - Math.abs(((theta) % 4) - 2)) * amplitude; // sawtooth
                     
                     if (curLevel+test < baseLevel) {
                         islandVertices[j+1] += test;
