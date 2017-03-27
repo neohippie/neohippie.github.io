@@ -26,6 +26,16 @@
     
     <script src="js/loadTextures.js">              </script>
     
+    <style>
+        body {
+            background-color: black;
+        }
+        #container {
+            //filter: blur(1px) saturate(120%) sepia(40%);
+            //-webkit-mask-image: radial-gradient(50% 50%, black 50%, rgba(0,0,0,0.4) 100%);
+        }
+    </style>
+    
     <script>
     
         if (!Detector.webgl) {
@@ -55,6 +65,8 @@
         function init(textures) {
         
             var container = document.createElement('div');
+            container.id  = "container";
+            
             document.body.appendChild(container);
             
             renderer = new THREE.WebGLRenderer();
@@ -124,8 +136,8 @@
             textures.waterNormals.wrapS = textures.waterNormals.wrapT = THREE.RepeatWrapping;
             
             oceanWater = new THREE.Water(renderer, camera, scene, {
-                textureWidth:  1024,
-                textureHeight: 1024,
+                textureWidth:  512,
+                textureHeight: 512,
                 waterNormals: textures.waterNormals,
                 alpha: 	0.7,
                 sunDirection: sun.position.clone().normalize(),
@@ -183,7 +195,8 @@
             
             objLoader.load('models/la_osm.obj', function (model) {
                 model.scale   .set(  10000,  10000,   10000);
-                model.position.set(-900000, -10000, 1000000);
+                model.position.set(-300000, -12000, 400000);
+                model.rotation.y = -Math.PI * 0.5;
                 
                 scene.add(model);
             });
@@ -246,7 +259,7 @@
             }
             
             islandGeometry.attributes.position.needsUpdate = true;
-            oceanWater.material.uniforms.time.value += 1.0 / 60.0;
+            oceanWater.material.uniforms.time.value -= 1.0 / 30.0;
             
             controls.update();
             renderer.clear();
