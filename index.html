@@ -31,8 +31,8 @@
             background-color: black;
         }
         #container {
-            //filter: blur(1px) saturate(120%) sepia(40%);
-            //-webkit-mask-image: radial-gradient(50% 50%, black 50%, rgba(0,0,0,0.4) 100%);
+            filter: saturate(120%);
+            -webkit-mask-image: radial-gradient(50% 50%, black 50%, rgba(0,0,0,0.4) 100%);
         }
     </style>
     
@@ -48,12 +48,12 @@
         var oceanWater;
         var islandGeometry, islandVertices, islandClone;
         
-        var worldWidth = 256, worldDepth = 256,
+        var worldWidth = 512, worldDepth = 512,
             worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
             
         var textureAssets = [
             { property: 'waterNormals', file: 'textures/waternormals.jpg'       },
-            { property: 'heightMap'   , file: 'textures/island_heightmap.jpg'   },
+            { property: 'heightMap'   , file: 'textures/island_heightmap_text.jpg'   },
             { property: 'sand'        , file: 'textures/sand.png'               }
         ];
             
@@ -93,7 +93,7 @@
             sun.position.set(-21500, 1000, -10000);
             
             scene.add(sun);
-            scene.add(new THREE.AmbientLight(0x444444));
+            scene.add(new THREE.AmbientLight(0x444444, 0.3));
             
             /*var geometry = new THREE.BoxGeometry(100, 100, 100 ;
             var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
@@ -121,13 +121,13 @@
             var islandMaterial = new THREE.MeshLambertMaterial( { 
                 map: textures.sand, 
                 polygonOffset: true,
-                polygonOffsetFactor: -4 
+                polygonOffsetFactor: 1.0
             });
 
             var islandMesh = new THREE.Mesh(islandGeometry, islandMaterial);
             
-            islandMesh.position.set(-10000, -7000, 10000);
-            //islandMesh.rotateY(-Math.PI/1.5);
+            islandMesh.position.set(-10000, -7000, 9000);
+            islandMesh.rotateY(Math.PI/2.2);
             
             scene.add(islandMesh);
             
@@ -139,7 +139,7 @@
                 textureWidth:  512,
                 textureHeight: 512,
                 waterNormals: textures.waterNormals,
-                alpha: 	0.7,
+                alpha: 	0.75,
                 sunDirection: sun.position.clone().normalize(),
                 sunColor:     sun.color,
                 waterColor: 0x001e0f,
@@ -233,7 +233,7 @@
             render();
         }
 
-        var WATER_LEVEL = 1200.0;
+        var WATER_LEVEL = 1100.0;
         var WATER_RATE  = 0.001;
 
         function render() {
