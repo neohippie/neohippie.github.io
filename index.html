@@ -32,7 +32,7 @@
         }
         #container {
             filter: saturate(120%);
-            -webkit-mask-image: radial-gradient(50% 50%, black 50%, rgba(0,0,0,0.4) 100%);
+            -webkit-mask-image: radial-gradient(50% 50%, black 70%, rgba(0,0,0,0.4) 100%);
         }
     </style>
     
@@ -89,7 +89,7 @@
             
             // light
 
-            var sun = new THREE.DirectionalLight(0xff9933, 1);
+            var sun = new THREE.DirectionalLight(0xFEF10C, 1);
             sun.position.set(-21500, 1000, -10000);
             
             scene.add(sun);
@@ -139,10 +139,10 @@
                 textureWidth:  512,
                 textureHeight: 512,
                 waterNormals: textures.waterNormals,
-                alpha: 	0.75,
+                alpha: 	1.0,
                 sunDirection: sun.position.clone().normalize(),
                 sunColor:     sun.color,
-                waterColor: 0x001e0f,
+                waterColor: 0xFEF10C,
                 distortionScale: 50.0,
                 fog: scene.fog != undefined
             });
