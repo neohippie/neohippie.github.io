@@ -23,6 +23,7 @@
     <script src="js/lib/three.js/WaterShader.js">  </script>
     <script src="js/lib/three.js/OBJLoader.js">    </script>
     <script src="js/lib/three.js/Detector.js">     </script>
+    <script src="js/lib/three.js/ImageUtils.js">   </script>
     
     <script src="js/loadTextures.js">              </script>
     
@@ -51,11 +52,12 @@
         var worldWidth = 512, worldDepth = 512,
             worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
             
+        var themeColor = new THREE.Color(0xFEF10C);
+            
         var textureAssets = [
             { property: 'waterNormals', file: 'textures/waternormals.jpg'          },
             { property: 'heightMap'   , file: 'textures/island_heightmap_text.jpg' },
             { property: 'sand'        , file: 'textures/sand.png'                  },
-            { property: 'sky'         , file: 'textures/sky.png'                   }
         ];
             
         loadTextures(textureAssets, function(textures) {
@@ -90,17 +92,11 @@
             
             // light
 
-            var sun = new THREE.DirectionalLight(0xFEF10C, 1);
+            var sun = new THREE.DirectionalLight(themeColor, 1);
             sun.position.set(-21500, 1000, -10000);
             
             scene.add(sun);
-            //scene.add(new THREE.AmbientLight(0x444444, 0.3));
-            
-            /*var geometry = new THREE.BoxGeometry(100, 100, 100 ;
-            var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-            var cube     = new THREE.Mesh(geometry, material);
-            cube.position.set(-21500, 1000, -10000);
-            scene.add(cube);*/
+            scene.add(new THREE.AmbientLight(0x444444, 0.3));
             
             // island
 
@@ -142,7 +138,7 @@
                 waterNormals: textures.waterNormals,
                 alpha: 	1.0,
                 
-                waterColor: 0xFEF10C, //0x001e0f,
+                waterColor: themeColor, //0x001e0f,
                 distortionScale: 50.0,
                 fog: scene.fog != undefined
             });
@@ -160,9 +156,9 @@
             
             // skybox
             
-            var skyImages = [];
-            for (var i = 0; i < 6; i++) { skyImages[i] = textures.sky.image; }
-
+            var skyTexture = THREE.ImageUtils.generateDataTexture(1, 1, themeColor);
+            var skyImages = Array(6).fill(skyTexture);
+            
             var cubeMap = new THREE.CubeTexture(skyImages);
             
             cubeMap.format      = THREE.RGBFormat;
