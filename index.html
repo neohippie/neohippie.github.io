@@ -32,8 +32,8 @@
             background-color: black;
         }
         #container {
-            //filter: saturate(120%);
-            //-webkit-mask-image: radial-gradient(50% 50%, black 50%, rgba(0,0,0,0.4) 100%);
+            /*filter: saturate(120%);
+            -webkit-mask-image: radial-gradient(50% 50%, black 50%, rgba(0,0,0,0.4) 100%);*/
         }
     </style>
     
@@ -186,7 +186,7 @@
             
             var objLoader = new THREE.OBJLoader();
             
-            objLoader.load('models/la_osm.obj', function (model) {
+            objLoader.load('models/la_osm_min_blocks_variable.obj', function (model) {
                 model.scale   .set(  10000,  10000,   10000);
                 model.position.set(-300000, -12000, 400000);
                 model.rotation.y = -Math.PI * 0.5;
