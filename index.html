@@ -24,6 +24,7 @@
     <script src="js/lib/three.js/OBJLoader.js">    </script>
     <script src="js/lib/three.js/Detector.js">     </script>
     <script src="js/lib/three.js/ImageUtils.js">   </script>
+    <script src="js/lib/three.js/CSS3DRenderer.js"></script>
     
     <script src="js/loadTextures.js">              </script>
     
@@ -36,7 +37,7 @@
             -webkit-mask-image: radial-gradient(50% 50%, black 50%, rgba(0,0,0,0.4) 100%);*/
         }
     </style>
-    
+
     <script>
     
         if (!Detector.webgl) {
@@ -45,9 +46,14 @@
         
         window.addEventListener('resize', onWindowResize, false);
         
-        var camera, scene, renderer;
+        var camera;
+        
+        var sceneGL, rendererGL;
         var oceanWater;
         var islandGeometry, islandVertices, islandClone;
+
+        var sceneCSS, rendererCSS;
+        var soundElement;
         
         var worldWidth = 512, worldDepth = 512,
             worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
@@ -72,31 +78,31 @@
             
             document.body.appendChild(container);
             
-            renderer = new THREE.WebGLRenderer();
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            rendererGL = new THREE.WebGLRenderer();
+            rendererGL.setPixelRatio(window.devicePixelRatio);
+            rendererGL.setSize(window.innerWidth, window.innerHeight);
             
-            container.appendChild(renderer.domElement);
+            container.appendChild(rendererGL.domElement);
             
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 3000000);
             camera.position.set(980.6899010596237, 29.60587836256858, -193.4658152822133);
             
-            controls = new THREE.OrbitControls( camera, renderer.domElement );
+            controls = new THREE.OrbitControls( camera, rendererGL.domElement );
             controls.enablePan = false;
             controls.minDistance = 1000.0;
             controls.maxDistance = 5000.0;
             controls.maxPolarAngle = Math.PI * 0.495;
             controls.target.set(0, 1, 0);
             
-            scene = new THREE.Scene();
+            sceneGL = new THREE.Scene();
             
             // light
 
             var sun = new THREE.DirectionalLight(themeColor, 1);
             sun.position.set(-21500, 1000, -10000);
             
-            scene.add(sun);
-            scene.add(new THREE.AmbientLight(0x444444, 0.3));
+            sceneGL.add(sun);
+            sceneGL.add(new THREE.AmbientLight(0x444444, 0.3));
             
             // island
 
@@ -126,13 +132,13 @@
             islandMesh.position.set(-10000, -7000, 9000);
             islandMesh.rotateY(Math.PI/2.2);
             
-            scene.add(islandMesh);
+            sceneGL.add(islandMesh);
             
             // ocean
             
             textures.waterNormals.wrapS = textures.waterNormals.wrapT = THREE.RepeatWrapping;
             
-            oceanWater = new THREE.Water(renderer, camera, scene, {
+            oceanWater = new THREE.Water(rendererGL, camera, sceneGL, {
                 textureWidth:  512,
                 textureHeight: 512,
                 waterNormals: textures.waterNormals,
@@ -140,7 +146,7 @@
                 
                 waterColor: themeColor, //0x001e0f,
                 distortionScale: 50.0,
-                fog: scene.fog != undefined
+                fog: sceneGL.fog != undefined
             });
             
             oceanMesh = new THREE.Mesh(
@@ -152,7 +158,7 @@
             oceanMesh.position.set(0, -6000, 0);
             oceanMesh.rotation.x = -Math.PI * 0.5;
             
-            scene.add(oceanMesh);
+            sceneGL.add(oceanMesh);
             
             // skybox
             
@@ -180,7 +186,7 @@
                 skyBoxMaterial
             );
 
-            scene.add(skyBox);
+            sceneGL.add(skyBox);
             
             // city
             
@@ -191,15 +197,48 @@
                 model.position.set(-300000, -12000, 400000);
                 model.rotation.y = -Math.PI * 0.5;
                 
-                scene.add(model);
+                sceneGL.add(model);
             });
+
+            // soundcloud player
+
+            rendererCSS	= new THREE.CSS3DRenderer();
+
+            rendererCSS.setSize(window.innerWidth, window.innerHeight);
+            rendererCSS.domElement.style.position = 'absolute';
+            rendererCSS.domElement.style.top      = 0;
+
+			container.appendChild(rendererCSS.domElement);
+
+            sceneCSS = new THREE.Scene();
+            
+            var div = document.createElement('div');
+            div.style.width  = '480px';
+            div.style.height = '360px';
+            div.style.backgroundColor = '#000';
+
+            var iframe = document.createElement('iframe');
+            iframe.style.width  = '480px';
+            iframe.style.height = '360px';
+            iframe.style.border = '0px';
+            iframe.src = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/269982914&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true';
+            
+            div.appendChild(iframe);
+
+            soundElement = new THREE.CSS3DObject(div);
+            soundElement.position.set(0, 200, -650);
+            soundElement.rotation.y = Math.PI * 0.5;
+
+            sceneCSS.add(soundElement);
+
         }
         
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
 
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            rendererGL .setSize(window.innerWidth, window.innerHeight);
+            rendererCSS.setSize(window.innerWidth, window.innerHeight);
         }
         
         function loadHeight(img) {
@@ -255,10 +294,11 @@
             oceanWater.material.uniforms.time.value -= 1.0 / 30.0;
             
             controls.update();
-            renderer.clear();
+            rendererGL.clear();
             
-            oceanWater.render();
-            renderer  .render(scene, camera);
+            oceanWater .render();
+            rendererGL .render(sceneGL,  camera);
+            rendererCSS.render(sceneCSS, camera);
         }
         
     </script>
