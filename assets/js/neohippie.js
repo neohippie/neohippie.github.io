@@ -166,9 +166,10 @@ function init(textures) {
 
     rendererCSS	= new THREE.CSS3DRenderer();
 
-    rendererCSS.setSize(window.innerWidth, window.innerHeight);
+    rendererCSS.setSize(480, 360);
     rendererCSS.domElement.style.position = 'absolute';
-    rendererCSS.domElement.style.top      = 0;
+    rendererCSS.domElement.style.top      = '5%';
+    rendererCSS.domElement.style.left     = (window.innerWidth - 480) + 'px';
 
     container.appendChild(rendererCSS.domElement);
 
@@ -188,8 +189,8 @@ function init(textures) {
     div.appendChild(iframe);
 
     soundElement = new THREE.CSS3DObject(div);
-    soundElement.position.set(0, 200, -650);
-    soundElement.rotation.y = Math.PI * 0.5;
+    soundElement.position.set(700, 0, -100);
+    soundElement.rotation.y = Math.PI * 0.55;
 
     sceneCSS.add(soundElement);
 }
