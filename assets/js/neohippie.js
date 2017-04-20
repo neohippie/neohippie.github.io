@@ -6,8 +6,6 @@ if (!Detector.webgl) {
     Detector.addGetWebGLMessage();
 }
 
-window.addEventListener('resize', onWindowResize, false);
-
 var camera;
 
 var sceneGL, rendererGL;
@@ -21,6 +19,9 @@ var worldWidth = 512, worldDepth = 512,
     worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
     
 var themeColor = new THREE.Color(0xFEF10C);
+
+var mouse = { x: 0, y: 0 };
+var CAMERA_RATE = 0.1;
     
 var textureAssets = [
     { property: 'waterNormals', file: 'assets/textures/waternormals.jpg'     },
@@ -30,6 +31,10 @@ var textureAssets = [
     
 loadTextures(textureAssets, function(textures) {
     init(textures);
+
+    window.addEventListener('resize'   , onWindowResize);
+    window.addEventListener('mousemove', onMouseMove   );
+
     animate();
 });
 
@@ -47,7 +52,7 @@ function init(textures) {
     container.appendChild(rendererGL.domElement);
     
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 3000000);
-    camera.position.set(989.4533842205997, 16.70731731182066, 143.9975021910792);
+    camera.position.set(999.7691121715444, 16.707317311820717, 14.662964590995808);
     
     controls = new THREE.OrbitControls(camera, rendererGL.domElement);
     controls.enablePan = false;
@@ -185,8 +190,8 @@ function init(textures) {
     iframe.src = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/269982914&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true';
     
     soundElement = new THREE.CSS3DObject(iframe);
-    soundElement.position.set(430, 0, 100);
-    soundElement.rotation.y = Math.PI * 0.4;
+    soundElement.position.set(430, 0, 0);
+    soundElement.rotation.y = Math.PI * 0.45;
 
     sceneCSS.add(soundElement);
 }
@@ -197,6 +202,14 @@ function onWindowResize() {
 
     rendererGL .setSize(window.innerWidth,   window.innerHeight);
     rendererCSS.setSize(window.innerWidth/3, window.innerHeight/2);
+}
+
+function onMouseMove(e) {
+    camera.position.x += (e.clientX -   mouse.x) * CAMERA_RATE;
+    camera.position.y += (  mouse.y - e.clientY) * CAMERA_RATE;
+
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
 }
 
 function loadHeight(img) {
