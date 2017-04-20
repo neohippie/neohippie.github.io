@@ -29,7 +29,7 @@ var SOUNDCLOUD_URL = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcl
     
 var TEXTURE_ASSETS = [
     { property: 'waterNormals', file: 'assets/textures/waternormals.jpg'     },
-    { property: 'heightMap'   , file: 'assets/textures/island_heightmap.png' }
+    { property: 'heightMap'   , file: 'assets/textures/island_heightmap_2.png' }
 ];
 
 init();
