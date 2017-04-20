@@ -159,7 +159,7 @@ function init(textures) {
     
     var objLoader = new THREE.OBJLoader();
     
-    objLoader.load('assets/models/la_osm_min_blocks_variable_land.obj', function (model) {
+    objLoader.load('assets/models/la_osm.obj', function (model) {
         model.scale   .set(  10000,  10000,   10000);
         model.position.set(-300000, -12000, 400000);
         model.rotation.y = -Math.PI * 0.5;
