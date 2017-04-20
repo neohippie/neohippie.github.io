@@ -20,8 +20,8 @@ var worldWidth = 512, worldDepth = 512,
     
 var themeColor = new THREE.Color(0xFEF10C);
 
-var mouse = { x: 0, y: 0 };
-var CAMERA_RATE = 0.1;
+var mouseY = 0;
+var CAMERA_RATE = 0.05;
     
 var textureAssets = [
     { property: 'waterNormals', file: 'assets/textures/waternormals.jpg'     },
@@ -190,7 +190,7 @@ function init(textures) {
     iframe.src = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/269982914&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true';
     
     soundElement = new THREE.CSS3DObject(iframe);
-    soundElement.position.set(430, 0, 0);
+    soundElement.position.set(380, 0, 0);
     soundElement.rotation.y = Math.PI * 0.45;
 
     sceneCSS.add(soundElement);
@@ -205,11 +205,8 @@ function onWindowResize() {
 }
 
 function onMouseMove(e) {
-    camera.position.x += (e.clientX -   mouse.x) * CAMERA_RATE;
-    camera.position.y += (  mouse.y - e.clientY) * CAMERA_RATE;
-
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
+    camera.position.y += (mouseY - e.clientY) * CAMERA_RATE;
+    mouseY = e.clientY;
 }
 
 function loadHeight(img) {
