@@ -22,15 +22,14 @@ var ISLAND_DEPTH = 512;
 var THEME_COLOR = new THREE.Color(0xFEF10C);
 var CAMERA_RATE = 0.05;
 
-var WATER_LEVEL = 4000.0;
+var WATER_LEVEL = 10000.0;
 var WATER_RATE  = 0.001;
 
 var SOUNDCLOUD_URL = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/269982914&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true';
     
 var TEXTURE_ASSETS = [
     { property: 'waterNormals', file: 'assets/textures/waternormals.jpg'     },
-    { property: 'heightMap'   , file: 'assets/textures/island_heightmap.png' },
-    { property: 'sand'        , file: 'assets/textures/sand.jpg'             }
+    { property: 'heightMap'   , file: 'assets/textures/island_heightmap.png' }
 ];
 
 init();
@@ -103,13 +102,13 @@ function buildScene(textures) {
     
     islandClone = islandVertices.slice();
 
-    textures.sand.wrapS    = textures.sand.wrapT    = THREE.RepeatWrapping;
-    textures.sand.repeat.x = textures.sand.repeat.y = 3;
+    /*textures.sand.wrapS    = textures.sand.wrapT    = THREE.RepeatWrapping;
+    textures.sand.repeat.x = textures.sand.repeat.y = 3;*/
     
-    var islandMaterial = new THREE.MeshLambertMaterial( { 
-        map: textures.sand, 
-        polygonOffset: true,
-        polygonOffsetFactor: 1.0
+    var islandMaterial = new THREE.MeshBasicMaterial( { 
+        color: 0x000000, 
+        /*polygonOffset      : true,
+        polygonOffsetFactor: 0.0*/
     });
 
     var islandMesh = new THREE.Mesh(islandGeometry, islandMaterial);
@@ -126,7 +125,7 @@ function buildScene(textures) {
         textureWidth : 512,
         textureHeight: 512,
 
-        alpha          : 0.95,
+        alpha          : 1.0 ,
         distortionScale: 50.0,
 
         waterNormals: textures.waterNormals,        
