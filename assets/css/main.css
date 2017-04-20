@@ -12,25 +12,30 @@ body {
 }
 
 .navigation {
+	width: 30%;
 	position: absolute;
-	margin-top :  3%;
-	margin-left: 12%;
+
+	margin-top: 1%;
+	display: flex;
 }
 
 .navigation a {
-	font-size      : 320%;
+	font-size      : 200%;
 	font-family    : Roboto, sans-serif;
 	font-weight    : bold;
 
 	text-decoration: none;
 	color          : black;
+
+	flex   : 1;
+	display: flex;
+
+	align-items    : center;
+ 	justify-content: center;
 }
+
+
 
 .navigation a:hover {
 	text-decoration: underline;
-}
-
-.navigation a:nth-of-type(even) {
-	margin-left : 85px;
-	margin-right: 85px;
 }

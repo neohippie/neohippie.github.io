@@ -47,9 +47,9 @@ function init(textures) {
     container.appendChild(rendererGL.domElement);
     
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 3000000);
-    camera.position.set(980.6899010596237, 29.60587836256858, -193.4658152822133);
+    camera.position.set(989.4533842205997, 16.70731731182066, 143.9975021910792);
     
-    controls = new THREE.OrbitControls( camera, rendererGL.domElement );
+    controls = new THREE.OrbitControls(camera, rendererGL.domElement);
     controls.enablePan = false;
     controls.minDistance = 1000.0;
     controls.maxDistance = 5000.0;
@@ -91,7 +91,7 @@ function init(textures) {
 
     var islandMesh = new THREE.Mesh(islandGeometry, islandMaterial);
     
-    islandMesh.position.set(-10000, -7000, 9000);
+    islandMesh.position.set(-10000, -7000, 7000);
     islandMesh.rotateY(Math.PI/2.2);
     
     sceneGL.add(islandMesh);
@@ -164,15 +164,15 @@ function init(textures) {
 
     // soundcloud player
 
-    var soundWidth  = window.innerWidth /3;
+    var soundWidth  = window.innerHeight / 1.3;
     var soundHeight = soundWidth;
 
     rendererCSS	= new THREE.CSS3DRenderer();
 
     rendererCSS.setSize(soundWidth, soundHeight);
     rendererCSS.domElement.style.position = 'absolute';
-    rendererCSS.domElement.style.top      = '2%';
-    rendererCSS.domElement.style.left     = '65%';
+    rendererCSS.domElement.style.top      = '0px';
+    rendererCSS.domElement.style.right    = '0px';
 
     container.appendChild(rendererCSS.domElement);
 
@@ -184,11 +184,9 @@ function init(textures) {
     iframe.style.border = '0px';
     iframe.src = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/269982914&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true';
     
-    //div.appendChild(iframe);
-
     soundElement = new THREE.CSS3DObject(iframe);
-    soundElement.position.set(620, 15, -115);
-    soundElement.rotation.y = Math.PI * 0.55;
+    soundElement.position.set(430, 0, 100);
+    soundElement.rotation.y = Math.PI * 0.4;
 
     sceneCSS.add(soundElement);
 }
@@ -256,6 +254,8 @@ function render() {
     controls.update();
     rendererGL.clear();
     
+    //console.log(camera.position);
+
     oceanWater .render();
     rendererGL .render(sceneGL,  camera);
     rendererCSS.render(sceneCSS, camera);
