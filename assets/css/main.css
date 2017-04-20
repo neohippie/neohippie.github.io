@@ -8,12 +8,10 @@ body {
 
 #navigation {
 	width: 30%;
-
-	right: 0px;
-	margin-top: 1%;
-	
 	position: absolute;
-	display : flex;
+
+	margin-top: 1%;
+	display: flex;
 }
 
 #navigation a {
@@ -21,10 +19,8 @@ body {
 	font-family    : Roboto, sans-serif;
 	font-weight    : bold;
 
-	
-	color          : black;	
-	text-shadow    : 0px 0px 10px rgba(254, 241, 12, 0.5);
 	text-decoration: none;
+	color          : black;
 
 	flex   : 1;
 	display: flex;
@@ -37,7 +33,7 @@ body {
 	text-decoration: underline;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 800px) {
 	#navigation {
 		width: 100%;
 		margin-top: 20%;
@@ -47,25 +43,63 @@ body {
 	}
 }
 
-#soundcloud-container {
-	width: 100%;
-	bottom:  5%;
+@media (min-width: 800px) {
+	#soundcloud-container {
+		width : 688.462px;
+		height: 688.462px;
 
-	position: absolute;
-}
+		position: absolute;
+		overflow: hidden;
+		
+		top  : 0px;
+		right: 0px;
 
-#soundcloud-widget {
-	width : 50vh;
-	height: 50vh;
+		transform-style: preserve-3d;
+		perspective: 491.612px;
+	}
 
-	display: block;
-	
-	margin-left : auto;
-	margin-right: auto;
-}
+	#soundcloud-container div {
+		width : 688.462px;
+		height: 688.462px;
 
-@media (max-width: 1200px) {
+		transform-style: preserve-3d;
+		transform: translate3d(0px, 0px, 491.612px) 
+					matrix3d(0.0146647, 0.0511829, 0.998582, 0, -2.22079e-09, -0.998689, 0.0511884, 0, -0.999892, 0.000750665, 0.0146455, 0, 4.13673e-05, 0.998689, -1001.47, 1) 
+				translate3d(344.231px, 344.231px, 0px);
+	}
+
 	#soundcloud-widget {
+		width : 688.462px;
+		height: 688.462px;
+
+		position: absolute;
+		border: 0px;
+		
+		transform: translate3d(-50%, -50%, 0px) 
+					matrix3d(0.156434, 0, -0.987688, 0, 0, -1, 0, 0, 0.987688, 0, 0.156434, 0, 380, 0, 0, 1);
+	}
+}
+
+@media (max-width: 800px) {
+	#soundcloud-container {
+		width: 100%;
+		bottom:  5%;
+
+		position: absolute;
+	}
+
+	#soundcloud-container div {
+
+	}
+
+	#soundcloud-widget {
+		width : 50vh;
+		height: 50vh;
+
 		opacity: 0.8;
+		display: block;
+
+		margin-left : auto;
+		margin-right: auto;
 	}
 }

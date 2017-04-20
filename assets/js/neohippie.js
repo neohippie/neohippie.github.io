@@ -12,16 +12,21 @@ var sceneGL, meshGroup;
 var oceanWater;
 var islandGeometry, islandVertices, islandClone;
 
+var isDesktop = false;
+
 var THEME_COLOR      = new THREE.Color(0xFEF10C);
 var CAMERA_DIRECTION = new THREE.Vector3(0, 1, 0);
+
+var POSITION_MOBILE  = new THREE.Vector3(777.8201414941439, 636.0861493323463  , -285.5644839020942  );
+var POSITION_DESKTOP = new THREE.Vector3(999.7691121715444,  16.707317311820717,   14.662964590995808);
 
 var ISLAND_WIDTH = 512;
 var ISLAND_DEPTH = 512;
 
-var WATER_LEVEL  = 10000.0;
-var WATER_RATE   = 0.0005;
+var WATER_LEVEL = 4000.0;
+var WATER_RATE  = 0.001;
 
-var MIN_WIDTH = 1200;
+var MIN_WIDTH = 800;
 var lastWidth = MIN_WIDTH;
     
 var TEXTURE_ASSETS = [
@@ -43,7 +48,15 @@ function init() {
     rendererGL.setPixelRatio(window.devicePixelRatio);
 
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 3000000);
-    camera.position.set(777.8201414941439, 636.0861493323463, -285.5644839020942);
+
+    if (window.innerWidth < MIN_WIDTH) {
+        isDesktop = false;
+        camera.position.copy(POSITION_MOBILE);
+        
+    } else {
+        isDesktop = true;
+        camera.position.copy(POSITION_DESKTOP);
+    }
 
     camera.lookAt(CAMERA_DIRECTION);
 
@@ -167,9 +180,24 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
 
     if (window.innerWidth < MIN_WIDTH) {
+
+        /*if (isDesktop) {
+            camera.position.copy(POSITION_MOBILE);
+            camera.updateProjectionMatrix();
+            isDesktop = false;
+        }*/
+
         var direction = CAMERA_DIRECTION.applyEuler(new THREE.Euler(Math.PI/4, Math.PI/4, -Math.PI/2));
         meshGroup.translateOnAxis(direction, (window.innerWidth - lastWidth) * 12);
+
     } else {
+
+        /*if (!isDesktop) {
+            camera.position.copy(POSITION_DESKTOP);
+            camera.updateProjectionMatrix();
+            isDesktop = true;
+        }*/
+
         meshGroup.position.set(0, 0, 0);
     }
 
