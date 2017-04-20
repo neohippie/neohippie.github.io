@@ -26,7 +26,7 @@ var CAMERA_RATE = 0.05;
 var textureAssets = [
     { property: 'waterNormals', file: 'assets/textures/waternormals.jpg'     },
     { property: 'heightMap'   , file: 'assets/textures/island_heightmap.png' },
-    { property: 'sand'        , file: 'assets/textures/sand.png'             }
+    { property: 'sand'        , file: 'assets/textures/sand.jpg'             }
 ];
     
 loadTextures(textureAssets, function(textures) {
