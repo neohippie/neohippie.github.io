@@ -23,9 +23,9 @@ var worldWidth = 512, worldDepth = 512,
 var themeColor = new THREE.Color(0xFEF10C);
     
 var textureAssets = [
-    { property: 'waterNormals', file: 'assets/textures/waternormals.jpg'          },
-    { property: 'heightMap'   , file: 'assets/textures/island_heightmap_text.jpg' },
-    { property: 'sand'        , file: 'assets/textures/sand.png'                  },
+    { property: 'waterNormals', file: 'assets/textures/waternormals.jpg'     },
+    { property: 'heightMap'   , file: 'assets/textures/island_heightmap.png' },
+    { property: 'sand'        , file: 'assets/textures/sand.png'             }
 ];
     
 loadTextures(textureAssets, function(textures) {
@@ -104,7 +104,7 @@ function init(textures) {
         textureWidth:  512,
         textureHeight: 512,
         waterNormals: textures.waterNormals,
-        alpha: 	1.0,
+        alpha: 	0.95,
         
         waterColor: themeColor, //0x001e0f,
         distortionScale: 50.0,
@@ -223,7 +223,7 @@ function animate() {
     render();
 }
 
-var WATER_LEVEL = 1100.0;
+var WATER_LEVEL = 4000.0;
 var WATER_RATE  = 0.001;
 
 function render() {
@@ -239,7 +239,7 @@ function render() {
             var theta     = WATER_RATE  * performance.now();
             var amplitude = WATER_LEVEL / baseLevel;
             
-            var test = Math.sin  (theta)            * amplitude
+            var test = Math.sin  (theta)             * amplitude
                 +  (1 - Math.abs(((theta) % 4) - 2)) * amplitude; // sawtooth
             
             if (curLevel+test < baseLevel) {
@@ -249,7 +249,7 @@ function render() {
     }
     
     islandGeometry.attributes.position.needsUpdate = true;
-    oceanWater.material.uniforms.time.value -= 1.0 / 30.0;
+    oceanWater.material.uniforms.time.value -= 1.0 / 5.0;
     
     controls.update();
     rendererGL.clear();
