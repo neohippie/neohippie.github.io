@@ -6,20 +6,23 @@ if (!Detector.webgl) {
     Detector.addGetWebGLMessage();
 }
 
-var camera;
+var camera, rendererGL;
+var sceneGL, meshGroup;
 
-var sceneGL, rendererGL;
 var oceanWater;
 var islandGeometry, islandVertices, islandClone;
+
+var THEME_COLOR      = new THREE.Color(0xFEF10C);
+var CAMERA_DIRECTION = new THREE.Vector3(0, 1, 0);
 
 var ISLAND_WIDTH = 512;
 var ISLAND_DEPTH = 512;
 
-var THEME_COLOR = new THREE.Color(0xFEF10C);
-var CAMERA_RATE = 0.05;
+var WATER_LEVEL  = 10000.0;
+var WATER_RATE   = 0.0005;
 
-var WATER_LEVEL = 10000.0;
-var WATER_RATE  = 0.0005;
+var MIN_WIDTH = 1200;
+var lastWidth = MIN_WIDTH;
     
 var TEXTURE_ASSETS = [
     { property: 'waterNormals', file: 'assets/textures/waternormals.jpg'     },
@@ -42,25 +45,18 @@ function init() {
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 3000000);
     camera.position.set(777.8201414941439, 636.0861493323463, -285.5644839020942);
 
+    camera.lookAt(CAMERA_DIRECTION);
+
+    sceneGL   = new THREE.Scene();
+    meshGroup = new THREE.Group();
+
     onWindowResize();
 
     container.appendChild(rendererGL .domElement);
-
-    controls = new THREE.OrbitControls(camera, rendererGL.domElement);
-
-    controls.enablePan     = false;
-    controls.minDistance   = 1000.0;
-    controls.maxDistance   = 5000.0;
-    controls.maxPolarAngle = Math.PI * 0.495;
-    
-    controls.target.set(0, 1, 0);
-
     window.addEventListener('resize', onWindowResize);
 }
 
 function buildScene(textures) {
-
-    sceneGL = new THREE.Scene();
     
     // light
 
@@ -88,7 +84,7 @@ function buildScene(textures) {
     islandMesh.position.set(-10000, -7000, 7000);
     islandMesh.rotateY(Math.PI/2.2);
     
-    sceneGL.add(islandMesh);
+    meshGroup.add(islandMesh);
     
     // ocean
     
@@ -117,7 +113,7 @@ function buildScene(textures) {
     oceanMesh.position.set(0, -6000, 0);
     oceanMesh.rotation.x = -Math.PI * 0.5;
     
-    sceneGL.add(oceanMesh);
+    meshGroup.add(oceanMesh);
     
     // skybox
     
@@ -157,15 +153,27 @@ function buildScene(textures) {
         model.position.set(-300000, -12000,  400000);
         model.rotation.y = -Math.PI * 0.5;
         
-        sceneGL.add(model);
+        meshGroup.add(model);
     });
+
+    sceneGL.add(meshGroup);
 }
 
 function onWindowResize() {
+
+    rendererGL.setSize(window.innerWidth, window.innerHeight);
+    
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
 
-    rendererGL.setSize(window.innerWidth, window.innerHeight);
+    if (window.innerWidth < MIN_WIDTH) {
+        var direction = CAMERA_DIRECTION.applyEuler(new THREE.Euler(Math.PI/4, Math.PI/4, -Math.PI/2));
+        meshGroup.translateOnAxis(direction, (window.innerWidth - lastWidth) * 12);
+    } else {
+        meshGroup.position.set(0, 0, 0);
+    }
+
+    lastWidth = window.innerWidth;
 }
 
 function loadHeight(img) {
@@ -221,7 +229,6 @@ function render() {
     islandGeometry.attributes.position.needsUpdate = true;
     oceanWater.material.uniforms.time.value -= 1.0 / 5.0;
     
-    controls.update();
     rendererGL.clear();
     
     oceanWater .render();
