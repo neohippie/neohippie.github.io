@@ -13,9 +13,6 @@ var sceneGL, rendererGL;
 var oceanWater;
 var islandGeometry, islandVertices, islandClone;
 
-var sceneCSS, rendererCSS;
-var soundFrame;
-
 var ISLAND_WIDTH = 512;
 var ISLAND_DEPTH = 512;
 
@@ -23,13 +20,11 @@ var THEME_COLOR = new THREE.Color(0xFEF10C);
 var CAMERA_RATE = 0.05;
 
 var WATER_LEVEL = 10000.0;
-var WATER_RATE  = 0.001;
-
-var SOUNDCLOUD_URL = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/269982914&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true';
+var WATER_RATE  = 0.0005;
     
 var TEXTURE_ASSETS = [
     { property: 'waterNormals', file: 'assets/textures/waternormals.jpg'     },
-    { property: 'heightMap'   , file: 'assets/textures/island_heightmap_2.png' }
+    { property: 'heightMap'   , file: 'assets/textures/island_heightmap.png' }
 ];
 
 init();
@@ -40,27 +35,17 @@ loadTextures(TEXTURE_ASSETS, function(textures) {
 });
 
 function init() {
-    var container = document.getElementById('container');
+    var container = document.getElementById('webgl-container');
         
     rendererGL = new THREE.WebGLRenderer();
     rendererGL.setPixelRatio(window.devicePixelRatio);
 
-    rendererCSS	= new THREE.CSS3DRenderer();
-    rendererCSS.domElement.style.position = 'absolute';
-    rendererCSS.domElement.style.top      = '0px';
-    rendererCSS.domElement.style.right    = '0px';
-
-    soundFrame = document.createElement('iframe');
-    soundFrame.src = SOUNDCLOUD_URL;
-    soundFrame.style.border = '0px';
-
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 3000000);
-    camera.position.set(999.7691121715444, 16.707317311820717, 14.662964590995808);
+    camera.position.set(777.8201414941439, 636.0861493323463, -285.5644839020942);
 
     onWindowResize();
 
     container.appendChild(rendererGL .domElement);
-    container.appendChild(rendererCSS.domElement);
 
     controls = new THREE.OrbitControls(camera, rendererGL.domElement);
 
@@ -72,13 +57,12 @@ function init() {
     controls.target.set(0, 1, 0);
 
     window.addEventListener('resize'   , onWindowResize);
-    window.addEventListener('mousemove', onMouseMove   );
+   // window.addEventListener('mousemove', onMouseMove   );
 }
 
 function buildScene(textures) {
 
     sceneGL  = new THREE.Scene();
-    sceneCSS = new THREE.Scene();
     
     // light
 
@@ -186,15 +170,6 @@ function buildScene(textures) {
         
         sceneGL.add(model);
     });
-
-    // soundcloud player
-    
-    var soundElement = new THREE.CSS3DObject(soundFrame);
-
-    soundElement.position.set(380, 0, 0);
-    soundElement.rotation.y = Math.PI * 0.45;
-
-    sceneCSS.add(soundElement);
 }
 
 function onWindowResize() {
@@ -202,14 +177,6 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
 
     rendererGL.setSize(window.innerWidth, window.innerHeight);
-
-    var soundWidth  = window.innerHeight / 1.3;
-    var soundHeight = soundWidth;
-    
-    rendererCSS.setSize(soundWidth, soundHeight);
-
-    soundFrame.style.width  = soundWidth  + 'px';
-    soundFrame.style.height = soundHeight + 'px';
 }
 
 function onMouseMove(e) {
@@ -272,10 +239,11 @@ function render() {
     
     controls.update();
     rendererGL.clear();
+
+    //console.log(camera.position);
     
     oceanWater .render();
     rendererGL .render(sceneGL,  camera);
-    rendererCSS.render(sceneCSS, camera);
 }
 
 /*
