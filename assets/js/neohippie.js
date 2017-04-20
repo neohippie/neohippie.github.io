@@ -7,65 +7,83 @@ if (!Detector.webgl) {
 }
 
 var camera;
+var mouseY = 0;
 
 var sceneGL, rendererGL;
 var oceanWater;
 var islandGeometry, islandVertices, islandClone;
 
 var sceneCSS, rendererCSS;
-var soundElement;
+var soundFrame;
 
-var worldWidth = 512, worldDepth = 512,
-    worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
-    
-var themeColor = new THREE.Color(0xFEF10C);
+var ISLAND_WIDTH = 512;
+var ISLAND_DEPTH = 512;
 
-var mouseY = 0;
+var THEME_COLOR = new THREE.Color(0xFEF10C);
 var CAMERA_RATE = 0.05;
+
+var WATER_LEVEL = 4000.0;
+var WATER_RATE  = 0.001;
+
+var SOUNDCLOUD_URL = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/269982914&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true';
     
-var textureAssets = [
+var TEXTURE_ASSETS = [
     { property: 'waterNormals', file: 'assets/textures/waternormals.jpg'     },
     { property: 'heightMap'   , file: 'assets/textures/island_heightmap.png' },
     { property: 'sand'        , file: 'assets/textures/sand.jpg'             }
 ];
+
+init();
     
-loadTextures(textureAssets, function(textures) {
-    init(textures);
-
-    window.addEventListener('resize'   , onWindowResize);
-    window.addEventListener('mousemove', onMouseMove   );
-
+loadTextures(TEXTURE_ASSETS, function(textures) {
+    buildScene(textures);
     animate();
 });
 
-function init(textures) {
-
-    var container = document.createElement('div');
-    container.id  = "container";
-    
-    document.body.appendChild(container);
-    
+function init() {
+    var container = document.getElementById('container');
+        
     rendererGL = new THREE.WebGLRenderer();
     rendererGL.setPixelRatio(window.devicePixelRatio);
-    rendererGL.setSize(window.innerWidth, window.innerHeight);
-    
-    container.appendChild(rendererGL.domElement);
-    
+
+    rendererCSS	= new THREE.CSS3DRenderer();
+    rendererCSS.domElement.style.position = 'absolute';
+    rendererCSS.domElement.style.top      = '0px';
+    rendererCSS.domElement.style.right    = '0px';
+
+    soundFrame = document.createElement('iframe');
+    soundFrame.src = SOUNDCLOUD_URL;
+    soundFrame.style.border = '0px';
+
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 3000000);
     camera.position.set(999.7691121715444, 16.707317311820717, 14.662964590995808);
-    
+
+    onWindowResize();
+
+    container.appendChild(rendererGL .domElement);
+    container.appendChild(rendererCSS.domElement);
+
     controls = new THREE.OrbitControls(camera, rendererGL.domElement);
-    controls.enablePan = false;
-    controls.minDistance = 1000.0;
-    controls.maxDistance = 5000.0;
+
+    controls.enablePan     = false;
+    controls.minDistance   = 1000.0;
+    controls.maxDistance   = 5000.0;
     controls.maxPolarAngle = Math.PI * 0.495;
-    controls.target.set(0, 1, 0);
     
-    sceneGL = new THREE.Scene();
+    controls.target.set(0, 1, 0);
+
+    window.addEventListener('resize'   , onWindowResize);
+    window.addEventListener('mousemove', onMouseMove   );
+}
+
+function buildScene(textures) {
+
+    sceneGL  = new THREE.Scene();
+    sceneCSS = new THREE.Scene();
     
     // light
 
-    var sun = new THREE.DirectionalLight(themeColor, 1);
+    var sun = new THREE.DirectionalLight(THEME_COLOR, 1);
     sun.position.set(-21500, 1000, -10000);
     
     sceneGL.add(sun);
@@ -73,7 +91,7 @@ function init(textures) {
     
     // island
 
-    islandGeometry = new THREE.PlaneBufferGeometry(50000, 50000, worldWidth-1, worldDepth-1);
+    islandGeometry = new THREE.PlaneBufferGeometry(50000, 50000, ISLAND_WIDTH-1, ISLAND_DEPTH-1);
     islandGeometry.rotateX(-Math.PI/2);
 
     var islandData = loadHeight(textures.heightMap.image)
@@ -95,7 +113,6 @@ function init(textures) {
     });
 
     var islandMesh = new THREE.Mesh(islandGeometry, islandMaterial);
-    
     islandMesh.position.set(-10000, -7000, 7000);
     islandMesh.rotateY(Math.PI/2.2);
     
@@ -106,14 +123,16 @@ function init(textures) {
     textures.waterNormals.wrapS = textures.waterNormals.wrapT = THREE.RepeatWrapping;
     
     oceanWater = new THREE.Water(rendererGL, camera, sceneGL, {
-        textureWidth:  512,
+        textureWidth : 512,
         textureHeight: 512,
-        waterNormals: textures.waterNormals,
-        alpha: 	0.95,
-        
-        waterColor: themeColor, //0x001e0f,
+
+        alpha          : 0.95,
         distortionScale: 50.0,
-        fog: sceneGL.fog != undefined
+
+        waterNormals: textures.waterNormals,        
+        waterColor  : THEME_COLOR          ,
+
+        fog: sceneGL.fog != undefined,        
     });
     
     oceanMesh = new THREE.Mesh(
@@ -122,6 +141,7 @@ function init(textures) {
     );
 
     oceanMesh.add(oceanWater);
+
     oceanMesh.position.set(0, -6000, 0);
     oceanMesh.rotation.x = -Math.PI * 0.5;
     
@@ -129,8 +149,8 @@ function init(textures) {
     
     // skybox
     
-    var skyTexture = THREE.ImageUtils.generateDataTexture(1, 1, themeColor);
-    var skyImages = Array(6).fill(skyTexture);
+    var skyTexture = THREE.ImageUtils.generateDataTexture(1, 1, THEME_COLOR);
+    var skyImages  = Array(6).fill(skyTexture);
     
     var cubeMap = new THREE.CubeTexture(skyImages);
     
@@ -142,10 +162,11 @@ function init(textures) {
 
     var skyBoxMaterial = new THREE.ShaderMaterial( {
         fragmentShader: cubeShader.fragmentShader,
-        vertexShader: cubeShader.vertexShader,
-        uniforms: cubeShader.uniforms,
+        vertexShader  : cubeShader.vertexShader  ,
+        uniforms      : cubeShader.uniforms      ,
+
         depthWrite: false,
-        side: THREE.BackSide
+        side      : THREE.BackSide
     });
 
     var skyBox = new THREE.Mesh(
@@ -159,37 +180,18 @@ function init(textures) {
     
     var objLoader = new THREE.OBJLoader();
     
-    objLoader.load('assets/models/la_osm.obj', function (model) {
+    objLoader.load('assets/models/la_osm.obj', function(model) {
         model.scale   .set(  10000,  10000,   10000);
-        model.position.set(-300000, -12000, 400000);
+        model.position.set(-300000, -12000,  400000);
         model.rotation.y = -Math.PI * 0.5;
         
         sceneGL.add(model);
     });
 
     // soundcloud player
-
-    var soundWidth  = window.innerHeight / 1.3;
-    var soundHeight = soundWidth;
-
-    rendererCSS	= new THREE.CSS3DRenderer();
-
-    rendererCSS.setSize(soundWidth, soundHeight);
-    rendererCSS.domElement.style.position = 'absolute';
-    rendererCSS.domElement.style.top      = '0px';
-    rendererCSS.domElement.style.right    = '0px';
-
-    container.appendChild(rendererCSS.domElement);
-
-    sceneCSS = new THREE.Scene();
     
-    var iframe = document.createElement('iframe');
-    iframe.style.width  = soundWidth  + 'px';
-    iframe.style.height = soundHeight + 'px';
-    iframe.style.border = '0px';
-    iframe.src = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/269982914&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true';
-    
-    soundElement = new THREE.CSS3DObject(iframe);
+    var soundElement = new THREE.CSS3DObject(soundFrame);
+
     soundElement.position.set(380, 0, 0);
     soundElement.rotation.y = Math.PI * 0.45;
 
@@ -197,11 +199,18 @@ function init(textures) {
 }
 
 function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
 
-    rendererGL .setSize(window.innerWidth,   window.innerHeight);
-    rendererCSS.setSize(window.innerWidth/3, window.innerHeight/2);
+    rendererGL.setSize(window.innerWidth, window.innerHeight);
+
+    var soundWidth  = window.innerHeight / 1.3;
+    var soundHeight = soundWidth;
+    
+    rendererCSS.setSize(soundWidth, soundHeight);
+
+    soundFrame.style.width  = soundWidth  + 'px';
+    soundFrame.style.height = soundHeight + 'px';
 }
 
 function onMouseMove(e) {
@@ -210,7 +219,7 @@ function onMouseMove(e) {
 }
 
 function loadHeight(img) {
-    var canvas = document.createElement('canvas');
+    var canvas  = document.createElement('canvas');
     var context = canvas.getContext('2d');
     
     canvas.width  = img.width;
@@ -224,23 +233,14 @@ function loadHeight(img) {
     for (var i = 0, n = data.length; i < n; i += 4) {
         normPixels.push((data[i] + data[i+1] + data[i+2]) / 3);
     }
-    
+
     return normPixels;
 }
 
-function animate() {
-    requestAnimationFrame(animate);
-    render();
-}
-
-var WATER_LEVEL = 4000.0;
-var WATER_RATE  = 0.001;
-
-function render() {
-    
-    // simulate tide by lowering edges of island
+// simulate tide by lowering edges of island
+function simulateTide() {
     for (var i = 0, j = 0; i < islandVertices.length; i++, j += 3) {
-    
+
         var curLevel  = islandVertices[j+1];
         var baseLevel = islandClone   [j+1];
         
@@ -257,6 +257,16 @@ function render() {
             }
         }
     }
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    render();
+}
+
+function render() {
+
+    simulateTide();
     
     islandGeometry.attributes.position.needsUpdate = true;
     oceanWater.material.uniforms.time.value -= 1.0 / 5.0;
@@ -264,8 +274,6 @@ function render() {
     controls.update();
     rendererGL.clear();
     
-    //console.log(camera.position);
-
     oceanWater .render();
     rendererGL .render(sceneGL,  camera);
     rendererCSS.render(sceneCSS, camera);
