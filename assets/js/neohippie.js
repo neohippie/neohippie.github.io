@@ -7,7 +7,6 @@ if (!Detector.webgl) {
 }
 
 var camera;
-var mouseY = 0;
 
 var sceneGL, rendererGL;
 var oceanWater;
@@ -56,13 +55,12 @@ function init() {
     
     controls.target.set(0, 1, 0);
 
-    window.addEventListener('resize'   , onWindowResize);
-   // window.addEventListener('mousemove', onMouseMove   );
+    window.addEventListener('resize', onWindowResize);
 }
 
 function buildScene(textures) {
 
-    sceneGL  = new THREE.Scene();
+    sceneGL = new THREE.Scene();
     
     // light
 
@@ -85,17 +83,8 @@ function buildScene(textures) {
     }
     
     islandClone = islandVertices.slice();
-
-    /*textures.sand.wrapS    = textures.sand.wrapT    = THREE.RepeatWrapping;
-    textures.sand.repeat.x = textures.sand.repeat.y = 3;*/
     
-    var islandMaterial = new THREE.MeshBasicMaterial( { 
-        color: 0x000000, 
-        /*polygonOffset      : true,
-        polygonOffsetFactor: 0.0*/
-    });
-
-    var islandMesh = new THREE.Mesh(islandGeometry, islandMaterial);
+    var islandMesh = new THREE.Mesh(islandGeometry, new THREE.MeshBasicMaterial( { color: 0x000000 } ));
     islandMesh.position.set(-10000, -7000, 7000);
     islandMesh.rotateY(Math.PI/2.2);
     
@@ -179,11 +168,6 @@ function onWindowResize() {
     rendererGL.setSize(window.innerWidth, window.innerHeight);
 }
 
-function onMouseMove(e) {
-    camera.position.y += (mouseY - e.clientY) * CAMERA_RATE;
-    mouseY = e.clientY;
-}
-
 function loadHeight(img) {
     var canvas  = document.createElement('canvas');
     var context = canvas.getContext('2d');
@@ -239,8 +223,6 @@ function render() {
     
     controls.update();
     rendererGL.clear();
-
-    //console.log(camera.position);
     
     oceanWater .render();
     rendererGL .render(sceneGL,  camera);
