@@ -164,32 +164,30 @@ function init(textures) {
 
     // soundcloud player
 
+    var soundWidth  = window.innerWidth /3;
+    var soundHeight = soundWidth;
+
     rendererCSS	= new THREE.CSS3DRenderer();
 
-    rendererCSS.setSize(480, 360);
+    rendererCSS.setSize(soundWidth, soundHeight);
     rendererCSS.domElement.style.position = 'absolute';
-    rendererCSS.domElement.style.top      = '5%';
-    rendererCSS.domElement.style.left     = (window.innerWidth - 480) + 'px';
+    rendererCSS.domElement.style.top      = '2%';
+    rendererCSS.domElement.style.left     = '65%';
 
     container.appendChild(rendererCSS.domElement);
 
     sceneCSS = new THREE.Scene();
     
-    var div = document.createElement('div');
-    div.style.width  = '480px';
-    div.style.height = '360px';
-    div.style.backgroundColor = '#000';
-
     var iframe = document.createElement('iframe');
-    iframe.style.width  = '480px';
-    iframe.style.height = '360px';
+    iframe.style.width  = soundWidth  + 'px';
+    iframe.style.height = soundHeight + 'px';
     iframe.style.border = '0px';
     iframe.src = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/269982914&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true';
     
-    div.appendChild(iframe);
+    //div.appendChild(iframe);
 
-    soundElement = new THREE.CSS3DObject(div);
-    soundElement.position.set(700, 0, -100);
+    soundElement = new THREE.CSS3DObject(iframe);
+    soundElement.position.set(620, 15, -115);
     soundElement.rotation.y = Math.PI * 0.55;
 
     sceneCSS.add(soundElement);
@@ -199,8 +197,8 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 
-    rendererGL .setSize(window.innerWidth, window.innerHeight);
-    rendererCSS.setSize(window.innerWidth, window.innerHeight);
+    rendererGL .setSize(window.innerWidth,   window.innerHeight);
+    rendererCSS.setSize(window.innerWidth/3, window.innerHeight/2);
 }
 
 function loadHeight(img) {
