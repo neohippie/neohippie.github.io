@@ -13,4 +13,24 @@ body {
 
 .navigation {
 	position: absolute;
+	margin-top :  3%;
+	margin-left: 12%;
+}
+
+.navigation a {
+	font-size      : 320%;
+	font-family    : Roboto, sans-serif;
+	font-weight    : bold;
+
+	text-decoration: none;
+	color          : black;
+}
+
+.navigation a:hover {
+	text-decoration: underline;
+}
+
+.navigation a:nth-of-type(even) {
+	margin-left : 85px;
+	margin-right: 85px;
 }
