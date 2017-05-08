@@ -33,7 +33,7 @@ body {
 	text-decoration: underline;
 }
 
-@media (max-width: 800px) {
+/*@media (max-width: 800px) {*/
 	#navigation {
 		width: 100%;
 		margin-top: 20%;
@@ -41,9 +41,9 @@ body {
 		position: absolute;
 		display : flex;				
 	}
-}
+/*}*/
 
-@media (min-width: 800px) {
+/*@media (min-width: 800px) {
 	#soundcloud-container {
 		width : 688.462px;
 		height: 688.462px;
@@ -78,9 +78,9 @@ body {
 		transform: translate3d(-50%, -50%, 0px) 
 					matrix3d(0.156434, 0, -0.987688, 0, 0, -1, 0, 0, 0.987688, 0, 0.156434, 0, 380, 0, 0, 1);
 	}
-}
+}*/
 
-@media (max-width: 800px) {
+/*@media (max-width: 800px) {*/
 	#soundcloud-container {
 		width: 100%;
 		bottom:  5%;
@@ -102,4 +102,4 @@ body {
 		margin-left : auto;
 		margin-right: auto;
 	}
-}
+/*}*/

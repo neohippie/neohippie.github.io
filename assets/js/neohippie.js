@@ -19,6 +19,7 @@ var CAMERA_DIRECTION = new THREE.Vector3(0, 1, 0);
 
 var POSITION_MOBILE  = new THREE.Vector3(777.8201414941439, 636.0861493323463  , -285.5644839020942  );
 var POSITION_DESKTOP = new THREE.Vector3(999.7691121715444,  16.707317311820717,   14.662964590995808);
+var GROUP_POSITION   = new THREE.Vector3(0.0, 0.0, 3361.9999999999993);
 
 var ISLAND_WIDTH = 512;
 var ISLAND_DEPTH = 512;
@@ -49,14 +50,14 @@ function init() {
 
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 3000000);
 
-    if (window.innerWidth < MIN_WIDTH) {
+    //if (window.innerWidth < MIN_WIDTH) {
         isDesktop = false;
         camera.position.copy(POSITION_MOBILE);
         
-    } else {
+   /* } else {
         isDesktop = true;
         camera.position.copy(POSITION_DESKTOP);
-    }
+    }*/
 
     camera.lookAt(CAMERA_DIRECTION);
 
@@ -169,6 +170,7 @@ function buildScene(textures) {
         meshGroup.add(model);
     });
 
+    meshGroup.position.copy(GROUP_POSITION);
     sceneGL.add(meshGroup);
 }
 
@@ -179,27 +181,28 @@ function onWindowResize() {
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
 
-    if (window.innerWidth < MIN_WIDTH) {
+    /*if (window.innerWidth < MIN_WIDTH) {
 
-        /*if (isDesktop) {
+        if (isDesktop) {
             camera.position.copy(POSITION_MOBILE);
             camera.updateProjectionMatrix();
             isDesktop = false;
-        }*/
+        }
 
         var direction = CAMERA_DIRECTION.applyEuler(new THREE.Euler(Math.PI/4, Math.PI/4, -Math.PI/2));
         meshGroup.translateOnAxis(direction, (window.innerWidth - lastWidth) * 12);
+        console.log(meshGroup.position)
 
     } else {
 
-        /*if (!isDesktop) {
+        if (!isDesktop) {
             camera.position.copy(POSITION_DESKTOP);
             camera.updateProjectionMatrix();
             isDesktop = true;
-        }*/
+        }
 
         meshGroup.position.set(0, 0, 0);
-    }
+    }*/
 
     lastWidth = window.innerWidth;
 }
