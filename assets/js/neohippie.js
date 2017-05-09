@@ -7,26 +7,22 @@ if (!Detector.webgl) {
 }
 
 var camera, rendererGL, sceneGL;
+var raycaster;
 
 var oceanWater;
 var islandGeometry, islandVertices, islandClone;
 var islandMesh;
-
-var isDesktop = false;
 
 var THEME_COLOR      = new THREE.Color(0xFEF10C);
 
 var CAMERA_DIRECTION = new THREE.Vector3(0, 1, 0);
 var CAMERA_POSITION  = new THREE.Vector3(777.8201414941439, 636.0861493323463, -285.5644839020942);
 
-var ISLAND_WIDTH  = 512;
-var ISLAND_HEIGHT = 512;
+var HEIGHTMAP_WIDTH  = 512;
+var HEIGHTMAP_HEIGHT = 512;
 
 var WATER_LEVEL = 4000.0;
 var WATER_RATE  = 0.001;
-
-var MIN_WIDTH = 800;
-var lastWidth = MIN_WIDTH;
     
 var TEXTURE_ASSETS = [
     { property: 'waterNormals', file: 'assets/textures/waternormals.jpg'     },
@@ -38,6 +34,7 @@ init();
 loadTextures(TEXTURE_ASSETS, function(textures) {
     buildScene(textures);
     animate();
+    window.addEventListener('resize', onWindowResize);
 });
 
 function init() {
@@ -45,18 +42,28 @@ function init() {
         
     rendererGL = new THREE.WebGLRenderer();
     rendererGL.setPixelRatio(window.devicePixelRatio);
+    rendererGL.setSize(window.innerWidth, window.innerHeight);
 
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 3000000);
-    //camera.position.copy(CAMERA_POSITION);
-    //camera.lookAt(CAMERA_DIRECTION);
+    camera.position.copy(CAMERA_POSITION);
+    camera.aspect = window.innerWidth/window.innerHeight;
+    
+    camera.lookAt(CAMERA_DIRECTION);
+    camera.updateProjectionMatrix();
 
-    sceneGL = new THREE.Scene();
+    sceneGL   = new THREE.Scene();
+    raycaster = new THREE.Raycaster();
 
-    onWindowResize();
+    container.appendChild(rendererGL.domElement);
+}
 
-    container.appendChild(rendererGL .domElement);
-    window.addEventListener('resize', onWindowResize);
-    window.addEventListener('mousedown', onMouseDown);
+function onWindowResize() {
+    rendererGL.setSize(window.innerWidth, window.innerHeight);
+    
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    buildIsland();
 }
 
 function buildScene(textures) {
@@ -142,76 +149,54 @@ function buildScene(textures) {
     
     // island
 
-    islandGeometry = new THREE.PlaneBufferGeometry(50000, 50000, ISLAND_WIDTH-1, ISLAND_HEIGHT-1);
+    islandMesh = new THREE.Mesh();
+    islandMesh.material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+
+    islandMesh.rotateY(Math.PI/2);
+
+    rendererGL.render(sceneGL, camera);
+    buildIsland();
+
+    sceneGL.add(islandMesh);
+}
+
+function buildIsland() {
+    var screenLeft  = new THREE.Vector2(-1, -(205/window.innerHeight) * 2 + 1);
+    var screenRight = new THREE.Vector2( 1, -(205/window.innerHeight) * 2 + 1);
+
+    raycaster.setFromCamera(screenLeft,  camera);    
+    var islandLeft = raycaster.intersectObject(oceanMesh)[0].point;
+
+    raycaster.setFromCamera(screenRight, camera);
+    var islandRight = raycaster.intersectObject(oceanMesh)[0].point;
+
+    var islandSize = islandLeft.distanceTo(islandRight);
+
+    // generate geometry
+
+    islandGeometry = new THREE.PlaneBufferGeometry(
+        islandSize, islandSize, HEIGHTMAP_WIDTH-1, HEIGHTMAP_HEIGHT-1);
+
     islandGeometry.rotateX(-Math.PI/2);
 
-    var islandData = generateIsland(ISLAND_WIDTH, ISLAND_HEIGHT);//loadHeight(textures.heightMap.image)
+    var islandData = generateHeightmap(HEIGHTMAP_WIDTH, HEIGHTMAP_HEIGHT);
     islandVertices = islandGeometry.attributes.position.array;
 
     for (var i = 0, j = 0, l = islandVertices.length; i < l; i++, j += 3) {
         islandVertices[j+1] = islandData[i] * 20.0;
     }
-    
+
     islandClone = islandVertices.slice();
-    
-    islandMesh = new THREE.Mesh(islandGeometry, new THREE.MeshBasicMaterial( { color: 0x000000 } ));
-    islandMesh.translateY(-7000);
-    //islandMesh.rotateY(Math.PI/2.2);
-    
-    sceneGL.add(islandMesh);
+    islandMesh.geometry = islandGeometry;
+
+    islandLeft.x +=  islandSize/2;
+    islandLeft.y  = -7000;
+    islandLeft.z -=  islandSize/2;
+
+    islandMesh.position.copy(islandLeft);
 }
 
-function onMouseDown(event) {    
-    var raycaster = new THREE.Raycaster(); // create once
-    var mouse     = new THREE.Vector2  ();
-
-    mouse.x =  (event.clientX / window.innerWidth)  * 2 - 1;
-	mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-
-    var point = raycaster.intersectObject(oceanMesh)[0].point;
-    point.x += 50000/2;
-    point.y = -7000;
-    point.z += 50000/2;
-
-    islandMesh.position.copy(point);
-}
-
-function onWindowResize() {
-
-    rendererGL.setSize(window.innerWidth, window.innerHeight);
-    
-    camera.aspect = window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
-
-    /*if (window.innerWidth < MIN_WIDTH) {
-
-        if (isDesktop) {
-            camera.position.copy(POSITION_MOBILE);
-            camera.updateProjectionMatrix();
-            isDesktop = false;
-        }
-
-        var direction = CAMERA_DIRECTION.applyEuler(new THREE.Euler(Math.PI/4, Math.PI/4, -Math.PI/2));
-        meshGroup.translateOnAxis(direction, (window.innerWidth - lastWidth) * 12);
-        console.log(meshGroup.position)
-
-    } else {
-
-        if (!isDesktop) {
-            camera.position.copy(POSITION_DESKTOP);
-            camera.updateProjectionMatrix();
-            isDesktop = true;
-        }
-
-        meshGroup.position.set(0, 0, 0);
-    }*/
-
-    lastWidth = window.innerWidth;
-}
-
-function generateIsland(width, height) {
+function generateHeightmap(width, height) {
     var canvas  = document.createElement('canvas');
     var context = canvas.getContext('2d');
 
@@ -227,45 +212,28 @@ function generateIsland(width, height) {
     context.fillStyle = gradient;
     context.fillRect(0, 0, width, height);
 
-    // abraham
+    // neohippie
 
     var rgba = context.getImageData(0, 30, 1, 1).data;
+    var text = 'NEOHIPPIE';
 
     context.fillStyle = 'rgb(' + (rgba[0]+4) + ', ' + (rgba[1]+4) + ', ' + (rgba[2]+4) + ')';
     context.font      = 'bold 40px Arial';
-    context.fillText('NEOHIPPIE', 0, 30);
+    context.fillText(text, width/2 - context.measureText(text).width/2, 30);
 
-    // neohippie
+    // abraham
 
     rgba = context.getImageData(0, 50, 1, 1).data;
+    text = 'ABRAHAM';
 
     context.fillStyle = 'rgb(' + (rgba[0]-8) + ', ' + (rgba[1]-8) + ', ' + (rgba[2]-8) + ')';
     context.font      = 'bold 30px Arial';
-    context.fillText('ABRAHAM', 0, 50);
+    context.fillText(text, width/2 - context.measureText(text).width/2, 50);
 
     // normalize data
 
     var data = context.getImageData(0, 0, width, height).data;
     var normPixels = [];
-
-    for (var i = 0, n = data.length; i < n; i += 4) {
-        normPixels.push((data[i] + data[i+1] + data[i+2]) / 3);
-    }
-
-    return normPixels;
-}
-
-function loadHeight(img) {
-    var canvas  = document.createElement('canvas');
-    var context = canvas.getContext('2d');
-    
-    canvas.width  = img.width;
-    canvas.height = img.height;
-    
-    context.drawImage(img, 0, 0, img.width, img.height);
-    
-    var data = context.getImageData(0, 0, img.height, img.width).data;
-    var normPixels = []
 
     for (var i = 0, n = data.length; i < n; i += 4) {
         normPixels.push((data[i] + data[i+1] + data[i+2]) / 3);
