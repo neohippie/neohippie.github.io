@@ -162,8 +162,8 @@ function buildScene(textures) {
 
 function buildIsland() {
 
-    var screenLeftPx  = new THREE.Vector2((window.innerWidth-900) / 6, window.innerHeight/6);
-    var screenRightPx = new THREE.Vector2( window.innerWidth         , window.innerHeight/2);
+    var screenLeftPx  = new THREE.Vector2((window.innerWidth-900) / 6, window.innerHeight / (0.004*window.innerWidth));
+    var screenRightPx = new THREE.Vector2( window.innerWidth         , window.innerHeight /  2                       );
 
     var screenLeft  = new THREE.Vector2((screenLeftPx .x/window.innerWidth ) * 2 - 1, 
                                        -(screenLeftPx .y/window.innerHeight) * 2 + 1);
@@ -237,7 +237,7 @@ function generateHeightmap(width, height) {
 
     context.fillStyle = 'rgb(' + (rgba[0]-16) + ', ' + (rgba[1]-16) + ', ' + (rgba[2]-16) + ')';
     context.font      = 'bold 64px Arial';
-    context.fillText(text, (width-neohippieWidth) + (neohippieWidth-context.measureText(text).width)/2, 117);
+    context.fillText(text, (width-neohippieWidth) + (neohippieWidth-context.measureText(text).width)/1.5, 117);
 
     // normalize data
 
