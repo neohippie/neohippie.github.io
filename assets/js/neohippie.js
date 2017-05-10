@@ -161,8 +161,15 @@ function buildScene(textures) {
 }
 
 function buildIsland() {
-    var screenLeft  = new THREE.Vector2(-1, -(205/window.innerHeight) * 2 + 1);
-    var screenRight = new THREE.Vector2( 1, -(205/window.innerHeight) * 2 + 1);
+
+    var screenLeftPx  = new THREE.Vector2((window.innerWidth-900) / 6, window.innerHeight/6);
+    var screenRightPx = new THREE.Vector2( window.innerWidth         , window.innerHeight/2);
+
+    var screenLeft  = new THREE.Vector2((screenLeftPx .x/window.innerWidth ) * 2 - 1, 
+                                       -(screenLeftPx .y/window.innerHeight) * 2 + 1);
+
+    var screenRight = new THREE.Vector2((screenRightPx.x/window.innerWidth ) * 2 - 1, 
+                                       -(screenRightPx.y/window.innerHeight) * 2 + 1);
 
     raycaster.setFromCamera(screenLeft,  camera);    
     var islandLeft = raycaster.intersectObject(oceanMesh)[0].point;
@@ -205,7 +212,7 @@ function generateHeightmap(width, height) {
 
     // gradient
 
-    var gradient = context.createLinearGradient(0, -230, 0, width*2);
+    var gradient = context.createLinearGradient(0, -170, 0, width*2);
     gradient.addColorStop(0, 'black');
     gradient.addColorStop(1, 'white');
 
@@ -214,21 +221,23 @@ function generateHeightmap(width, height) {
 
     // neohippie
 
-    var rgba = context.getImageData(0, 30, 1, 1).data;
+    var rgba = context.getImageData(0, 70, 1, 1).data;
     var text = 'NEOHIPPIE';
 
-    context.fillStyle = 'rgb(' + (rgba[0]+4) + ', ' + (rgba[1]+4) + ', ' + (rgba[2]+4) + ')';
-    context.font      = 'bold 40px Arial';
-    context.fillText(text, width/2 - context.measureText(text).width/2, 30);
+    context.fillStyle = 'rgb(' + (rgba[0]+8) + ', ' + (rgba[1]+8) + ', ' + (rgba[2]+8) + ')';
+    context.font      = 'bold 80px Arial';
+
+    var neohippieWidth = context.measureText(text).width;
+    context.fillText(text, width-neohippieWidth, 70);
 
     // abraham
 
-    rgba = context.getImageData(0, 50, 1, 1).data;
+    rgba = context.getImageData(0, 117, 1, 1).data;
     text = 'ABRAHAM';
 
-    context.fillStyle = 'rgb(' + (rgba[0]-8) + ', ' + (rgba[1]-8) + ', ' + (rgba[2]-8) + ')';
-    context.font      = 'bold 30px Arial';
-    context.fillText(text, width/2 - context.measureText(text).width/2, 50);
+    context.fillStyle = 'rgb(' + (rgba[0]-16) + ', ' + (rgba[1]-16) + ', ' + (rgba[2]-16) + ')';
+    context.font      = 'bold 64px Arial';
+    context.fillText(text, (width-neohippieWidth) + (neohippieWidth-context.measureText(text).width)/2, 117);
 
     // normalize data
 
