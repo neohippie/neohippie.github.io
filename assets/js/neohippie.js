@@ -6,17 +6,21 @@ if (!Detector.webgl) {
     Detector.addGetWebGLMessage();
 }
 
-var camera, rendererGL, sceneGL;
-var raycaster;
+var rendererGL, camera;
+var sceneGL, raycaster;
+
+var controlsFps;
+var controlsOrbit;
 
 var oceanWater;
+
+var islandHeightmap;
 var islandGeometry, islandVertices, islandClone;
 var islandMesh;
 
 var THEME_COLOR      = new THREE.Color(0xFEF10C);
 
-var CAMERA_DIRECTION = new THREE.Vector3(0, 1, 0);
-var CAMERA_POSITION  = new THREE.Vector3(777.8201414941439, 636.0861493323463, -285.5644839020942);
+var CAMERA_DIRECTION = new THREE.Vector3(-778, -636, 286);
 
 var HEIGHTMAP_WIDTH  = 512;
 var HEIGHTMAP_HEIGHT = 512;
@@ -44,17 +48,25 @@ function init() {
     rendererGL.setPixelRatio(window.devicePixelRatio);
     rendererGL.setSize(window.innerWidth, window.innerHeight);
 
-    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 3000000);
-    camera.position.copy(CAMERA_POSITION);
-    camera.aspect = window.innerWidth/window.innerHeight;
+    container.appendChild(rendererGL.domElement);
+
+    camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.5, 3000000);
+
+    //sceneGL.add(camera);
+    //camera.lookAt(CAMERA_DIRECTION);
+
+    /*controlsFps = new THREE.FirstPersonControls( camera, rendererGL.domElement );
+    controlsFps.movementSpeed = 10000;
+    controlsFps.activeLook = false;*/
     
-    camera.lookAt(CAMERA_DIRECTION);
-    camera.updateProjectionMatrix();
+    /*controlsOrbit = new THREE.OrbitControls(camera, rendererGL.domElement);
+    controlsOrbit.minDistance = 1000.0;
+    controlsOrbit.maxDistance = 5000.0;
+    controlsOrbit.maxPolarAngle = Math.PI * 0.495;
+    controlsOrbit.target.set(0, 1, 0);*/
 
     sceneGL   = new THREE.Scene();
     raycaster = new THREE.Raycaster();
-
-    container.appendChild(rendererGL.domElement);
 }
 
 function onWindowResize() {
@@ -63,7 +75,8 @@ function onWindowResize() {
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
 
-    buildIsland();
+    rendererGL.render(sceneGL, camera);
+    transformIsland();
 }
 
 function buildScene(textures) {
@@ -128,7 +141,6 @@ function buildScene(textures) {
     );
 
     oceanMesh.add(oceanWater);
-    oceanMesh.name = 'ocean';
 
     oceanMesh.position.set(0, -6000, 0);
     oceanMesh.rotation.x = -Math.PI * 0.5;
@@ -149,19 +161,41 @@ function buildScene(textures) {
     
     // island
 
-    islandMesh = new THREE.Mesh();
-    islandMesh.material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+    islandGeometry = new THREE.PlaneBufferGeometry(1, 1, HEIGHTMAP_WIDTH-1, HEIGHTMAP_HEIGHT-1);
+    islandGeometry.rotateX(-Math.PI/2);
+    
+    islandVertices  = islandGeometry.attributes.position.array;
+    islandHeightmap = generateHeightmap(HEIGHTMAP_WIDTH, HEIGHTMAP_HEIGHT);
 
+    for (var i = 0, j = 0, l = islandVertices.length; i < l; i++, j += 3) {
+        islandVertices[j+1] = islandHeightmap[i] * 20.0;
+    }
+
+    islandClone = islandVertices.slice();
+
+    islandMesh = new THREE.Mesh(islandGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }));
     islandMesh.rotateY(Math.PI/2);
+    islandMesh.translateY(-7000);
 
+    transformScene();
     rendererGL.render(sceneGL, camera);
-    buildIsland();
 
-    sceneGL.add(islandMesh);
+    transformIsland();
+    sceneGL.add(islandMesh);    
 }
 
-function buildIsland() {
+function transformScene() {
+    var m1 = new THREE.Matrix4();
+    var m2 = new THREE.Matrix4();
 
+    m1.lookAt(camera.position, CAMERA_DIRECTION, camera.up);
+    m2.getInverse(m1);
+
+    sceneGL.matrix.identity();
+    sceneGL.applyMatrix(m2);
+}
+
+function transformIsland() {
     var screenLeftPx  = new THREE.Vector2((window.innerWidth-900) / 6, window.innerHeight / (0.004*window.innerWidth));
     var screenRightPx = new THREE.Vector2( window.innerWidth         , window.innerHeight /  2                       );
 
@@ -171,8 +205,11 @@ function buildIsland() {
     var screenRight = new THREE.Vector2((screenRightPx.x/window.innerWidth ) * 2 - 1, 
                                        -(screenRightPx.y/window.innerHeight) * 2 + 1);
 
-    raycaster.setFromCamera(screenLeft,  camera);    
-    var islandLeft = raycaster.intersectObject(oceanMesh)[0].point;
+    //var islandLeft  = new THREE.Vector3(-17601.006496159836, -6000.000000000008,  36589.77174828261);
+    //var islandRight = new THREE.Vector3(-11744.752873307147, -5999.999999999999, -9311.878457812789);
+
+    raycaster.setFromCamera(screenLeft , camera);
+    var islandLeft  = raycaster.intersectObject(oceanMesh)[0].point;
 
     raycaster.setFromCamera(screenRight, camera);
     var islandRight = raycaster.intersectObject(oceanMesh)[0].point;
@@ -181,26 +218,17 @@ function buildIsland() {
 
     // generate geometry
 
-    islandGeometry = new THREE.PlaneBufferGeometry(
-        islandSize, islandSize, HEIGHTMAP_WIDTH-1, HEIGHTMAP_HEIGHT-1);
+    islandMesh.scale.x = islandSize;
+    islandMesh.scale.z = islandSize;
 
-    islandGeometry.rotateX(-Math.PI/2);
+    //islandLeft.x -=  islandSize/2;
+    //islandLeft.y  = -7000;
+    //islandLeft.z +=  islandSize/2;
 
-    var islandData = generateHeightmap(HEIGHTMAP_WIDTH, HEIGHTMAP_HEIGHT);
-    islandVertices = islandGeometry.attributes.position.array;
+    //islandMesh.position.copy(islandLeft);
 
-    for (var i = 0, j = 0, l = islandVertices.length; i < l; i++, j += 3) {
-        islandVertices[j+1] = islandData[i] * 20.0;
-    }
-
-    islandClone = islandVertices.slice();
-    islandMesh.geometry = islandGeometry;
-
-    islandLeft.x +=  islandSize/2;
-    islandLeft.y  = -7000;
-    islandLeft.z -=  islandSize/2;
-
-    islandMesh.position.copy(islandLeft);
+    //islandMesh.position.x =  islandSize/2;
+    //islandMesh.position.z = -islandSize/2;
 }
 
 function generateHeightmap(width, height) {
@@ -284,6 +312,10 @@ function render() {
     
     islandGeometry.attributes.position.needsUpdate = true;
     oceanWater.material.uniforms.time.value -= 1.0 / 5.0;
+
+    //controlsFps.update(1);
+    //controlsOrbit.update();
+    //console.log(camera);
     
     rendererGL.clear();
     
