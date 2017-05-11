@@ -21,18 +21,16 @@ var islandGeometry, islandVertices, islandClone;
 var islandMesh;
 
 var THEME_COLOR      = new THREE.Color(0xFEF10C);
-
 var CAMERA_DIRECTION = new THREE.Vector3(-778, -636, 286);
 
-var HEIGHTMAP_WIDTH  = 512;
-var HEIGHTMAP_HEIGHT = 512;
+var HEIGHTMAP_WIDTH  = 256;
+var HEIGHTMAP_HEIGHT = 256;
 
 var WATER_LEVEL = 4000.0;
 var WATER_RATE  = 0.001;
     
 var TEXTURE_ASSETS = [
-    { property: 'waterNormals', file: 'assets/textures/waternormals.jpg'     },
-    { property: 'heightMap'   , file: 'assets/textures/island_heightmap.png' }
+    { property: 'waterNormals', file: 'assets/textures/waternormals.jpg' }
 ];
 
 init();
@@ -41,6 +39,7 @@ loadTextures(TEXTURE_ASSETS, function(textures) {
     buildScene(textures);
     animate();
     window.addEventListener('resize', onWindowResize);
+    window.addEventListener('mousedown', onMouseDown);
 });
 
 function init() {
@@ -60,6 +59,10 @@ function init() {
     lookAtMatrix .lookAt(camera.position, CAMERA_DIRECTION, camera.up);
     lookAtInverse.getInverse(lookAtMatrix);
     
+    /*controlsFps = new THREE.FirstPersonControls(camera, rendererGL.domElement);
+    controlsFps.activeLook = false;
+    controlsFps.movementSpeed = 10000;*/
+
     /*controlsOrbit = new THREE.OrbitControls(camera, rendererGL.domElement);
     controlsOrbit.minDistance = 1000.0;
     controlsOrbit.maxDistance = 5000.0;
@@ -78,6 +81,19 @@ function onWindowResize() {
 
     rendererGL.render(sceneGL, camera);
     transformIsland();
+}
+
+function onMouseDown(event) {
+    var mouse = new THREE.Vector2((event.clientX/window.innerWidth)  * 2 - 1,
+                                 -(event.clientY/window.innerHeight) * 2 + 1);
+
+    raycaster.setFromCamera(mouse, camera);
+
+    var islandLeft = raycaster.intersectObject(oceanMesh)[0].point;
+    islandLeft.applyMatrix4(lookAtMatrix);
+
+    islandMesh.position.x = islandLeft.x + islandMesh.scale.x/2;
+    islandMesh.position.z = islandLeft.z - islandMesh.scale.z/2;
 }
 
 function buildScene(textures) {
@@ -143,7 +159,7 @@ function buildScene(textures) {
 
     oceanMesh.add(oceanWater);
 
-    oceanMesh.position.set(0, -6000, 0);
+    oceanMesh.position.set(0, -5200, 0);
     oceanMesh.rotation.x = -Math.PI * 0.5;
     
     sceneGL.add(oceanMesh);
@@ -186,8 +202,8 @@ function buildScene(textures) {
 }
 
 function transformIsland() {
-    var screenLeftPx  = new THREE.Vector2((window.innerWidth-900) / 6, window.innerHeight / (0.004*window.innerWidth));
-    var screenRightPx = new THREE.Vector2( window.innerWidth         , window.innerHeight /  2                       );
+    var screenLeftPx  = new THREE.Vector2(window.innerWidth/6, window.innerHeight / (0.004*window.innerWidth));
+    var screenRightPx = new THREE.Vector2(window.innerWidth  , window.innerHeight /  2                       );
 
     var screenLeft  = new THREE.Vector2((screenLeftPx .x/window.innerWidth ) * 2 - 1, 
                                        -(screenLeftPx .y/window.innerHeight) * 2 + 1);
@@ -235,19 +251,19 @@ function generateHeightmap(width, height) {
     var text = 'NEOHIPPIE';
 
     context.fillStyle = 'rgb(' + (rgba[0]+8) + ', ' + (rgba[1]+8) + ', ' + (rgba[2]+8) + ')';
-    context.font      = 'bold 80px Arial';
+    context.font      = 'bold 48px Arial';
 
     var neohippieWidth = context.measureText(text).width;
     context.fillText(text, width-neohippieWidth, 70);
 
     // abraham
 
-    rgba = context.getImageData(0, 117, 1, 1).data;
+    rgba = context.getImageData(0, 100, 1, 1).data;
     text = 'ABRAHAM';
 
     context.fillStyle = 'rgb(' + (rgba[0]-16) + ', ' + (rgba[1]-16) + ', ' + (rgba[2]-16) + ')';
-    context.font      = 'bold 64px Arial';
-    context.fillText(text, (width-neohippieWidth) + (neohippieWidth-context.measureText(text).width)/1.5, 117);
+    context.font      = 'bold 36px Arial';
+    context.fillText(text, (width-neohippieWidth) + (neohippieWidth-context.measureText(text).width)/1.5, 100);
 
     // normalize data
 
