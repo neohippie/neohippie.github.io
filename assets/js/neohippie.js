@@ -9,6 +9,8 @@ if (!Detector.webgl) {
 var rendererGL, camera;
 var sceneGL, raycaster;
 
+var lookAtMatrix, lookAtInverse;
+
 var controlsFps;
 var controlsOrbit;
 
@@ -52,12 +54,11 @@ function init() {
 
     camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.5, 3000000);
 
-    //sceneGL.add(camera);
-    //camera.lookAt(CAMERA_DIRECTION);
+    lookAtMatrix  = new THREE.Matrix4();
+    lookAtInverse = new THREE.Matrix4();
 
-    /*controlsFps = new THREE.FirstPersonControls( camera, rendererGL.domElement );
-    controlsFps.movementSpeed = 10000;
-    controlsFps.activeLook = false;*/
+    lookAtMatrix .lookAt(camera.position, CAMERA_DIRECTION, camera.up);
+    lookAtInverse.getInverse(lookAtMatrix);
     
     /*controlsOrbit = new THREE.OrbitControls(camera, rendererGL.domElement);
     controlsOrbit.minDistance = 1000.0;
@@ -177,22 +178,11 @@ function buildScene(textures) {
     islandMesh.rotateY(Math.PI/2);
     islandMesh.translateY(-7000);
 
-    transformScene();
+    sceneGL.applyMatrix(lookAtInverse);
     rendererGL.render(sceneGL, camera);
 
     transformIsland();
-    sceneGL.add(islandMesh);    
-}
-
-function transformScene() {
-    var m1 = new THREE.Matrix4();
-    var m2 = new THREE.Matrix4();
-
-    m1.lookAt(camera.position, CAMERA_DIRECTION, camera.up);
-    m2.getInverse(m1);
-
-    sceneGL.matrix.identity();
-    sceneGL.applyMatrix(m2);
+    sceneGL.add(islandMesh);
 }
 
 function transformIsland() {
@@ -205,30 +195,22 @@ function transformIsland() {
     var screenRight = new THREE.Vector2((screenRightPx.x/window.innerWidth ) * 2 - 1, 
                                        -(screenRightPx.y/window.innerHeight) * 2 + 1);
 
-    //var islandLeft  = new THREE.Vector3(-17601.006496159836, -6000.000000000008,  36589.77174828261);
-    //var islandRight = new THREE.Vector3(-11744.752873307147, -5999.999999999999, -9311.878457812789);
-
     raycaster.setFromCamera(screenLeft , camera);
     var islandLeft  = raycaster.intersectObject(oceanMesh)[0].point;
 
     raycaster.setFromCamera(screenRight, camera);
     var islandRight = raycaster.intersectObject(oceanMesh)[0].point;
 
-    var islandSize = islandLeft.distanceTo(islandRight);
+    islandLeft .applyMatrix4(lookAtMatrix);
+    islandRight.applyMatrix4(lookAtMatrix);
 
-    // generate geometry
+    var islandSize = islandLeft.distanceTo(islandRight);
 
     islandMesh.scale.x = islandSize;
     islandMesh.scale.z = islandSize;
 
-    //islandLeft.x -=  islandSize/2;
-    //islandLeft.y  = -7000;
-    //islandLeft.z +=  islandSize/2;
-
-    //islandMesh.position.copy(islandLeft);
-
-    //islandMesh.position.x =  islandSize/2;
-    //islandMesh.position.z = -islandSize/2;
+    islandMesh.position.x = islandLeft.x + islandSize/2;
+    islandMesh.position.z = islandLeft.z - islandSize/2;
 }
 
 function generateHeightmap(width, height) {
