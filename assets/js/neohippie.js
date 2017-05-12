@@ -175,8 +175,8 @@ function buildScene(textures) {
 }
 
 function transformIsland() {
-    var screenLeftPx  = new THREE.Vector2(window.innerWidth/6, window.innerHeight / (0.004*window.innerWidth));
-    var screenRightPx = new THREE.Vector2(window.innerWidth  , window.innerHeight /  2                       );
+    var screenLeftPx  = new THREE.Vector2(0                 + (( 0.3*window.innerWidth) - 150), window.innerHeight / ((0.002*window.innerWidth) + 2.5));
+    var screenRightPx = new THREE.Vector2(window.innerWidth - ((-0.3*window.innerWidth) + 150), window.innerHeight / 2                                );
 
     var screenLeft  = new THREE.Vector2((screenLeftPx .x/window.innerWidth ) * 2 - 1, 
                                        -(screenLeftPx .y/window.innerHeight) * 2 + 1);
@@ -211,7 +211,7 @@ function generateHeightmap(width, height) {
 
     // gradient
 
-    var gradient = context.createLinearGradient(0, -170, 0, width*2);
+    var gradient = context.createLinearGradient(0, -width, 0, width*2);
     gradient.addColorStop(0, 'black');
     gradient.addColorStop(1, 'white');
 
@@ -220,23 +220,21 @@ function generateHeightmap(width, height) {
 
     // neohippie
 
-    var rgba = context.getImageData(0, 70, 1, 1).data;
+    var rgba = context.getImageData(0, 30, 1, 1).data;
     var text = 'NEOHIPPIE';
 
     context.fillStyle = 'rgb(' + (rgba[0]+8) + ', ' + (rgba[1]+8) + ', ' + (rgba[2]+8) + ')';
-    context.font      = 'bold 48px Arial';
-
-    var neohippieWidth = context.measureText(text).width;
-    context.fillText(text, width-neohippieWidth, 70);
+    context.font      = 'bold 38px Arial';
+    context.fillText(text, width/2 - context.measureText(text).width/2, 30);
 
     // abraham
 
-    rgba = context.getImageData(0, 100, 1, 1).data;
+    rgba = context.getImageData(0, 50, 1, 1).data;
     text = 'ABRAHAM';
 
     context.fillStyle = 'rgb(' + (rgba[0]-16) + ', ' + (rgba[1]-16) + ', ' + (rgba[2]-16) + ')';
-    context.font      = 'bold 36px Arial';
-    context.fillText(text, (width-neohippieWidth) + (neohippieWidth-context.measureText(text).width)/1.5, 100);
+    context.font      = 'bold 26px Arial';
+    context.fillText(text, width/2 - context.measureText(text).width/2, 50);
 
     // normalize data
 
