@@ -11,9 +11,6 @@ var sceneGL, raycaster;
 
 var lookAtMatrix, lookAtInverse;
 
-var controlsFps;
-var controlsOrbit;
-
 var oceanWater;
 
 var islandHeightmap;
@@ -39,7 +36,6 @@ loadTextures(TEXTURE_ASSETS, function(textures) {
     buildScene(textures);
     animate();
     window.addEventListener('resize', onWindowResize);
-    window.addEventListener('mousedown', onMouseDown);
 });
 
 function init() {
@@ -58,16 +54,6 @@ function init() {
 
     lookAtMatrix .lookAt(camera.position, CAMERA_DIRECTION, camera.up);
     lookAtInverse.getInverse(lookAtMatrix);
-    
-    /*controlsFps = new THREE.FirstPersonControls(camera, rendererGL.domElement);
-    controlsFps.activeLook = false;
-    controlsFps.movementSpeed = 10000;*/
-
-    /*controlsOrbit = new THREE.OrbitControls(camera, rendererGL.domElement);
-    controlsOrbit.minDistance = 1000.0;
-    controlsOrbit.maxDistance = 5000.0;
-    controlsOrbit.maxPolarAngle = Math.PI * 0.495;
-    controlsOrbit.target.set(0, 1, 0);*/
 
     sceneGL   = new THREE.Scene();
     raycaster = new THREE.Raycaster();
@@ -81,19 +67,6 @@ function onWindowResize() {
 
     rendererGL.render(sceneGL, camera);
     transformIsland();
-}
-
-function onMouseDown(event) {
-    var mouse = new THREE.Vector2((event.clientX/window.innerWidth)  * 2 - 1,
-                                 -(event.clientY/window.innerHeight) * 2 + 1);
-
-    raycaster.setFromCamera(mouse, camera);
-
-    var islandLeft = raycaster.intersectObject(oceanMesh)[0].point;
-    islandLeft.applyMatrix4(lookAtMatrix);
-
-    islandMesh.position.x = islandLeft.x + islandMesh.scale.x/2;
-    islandMesh.position.z = islandLeft.z - islandMesh.scale.z/2;
 }
 
 function buildScene(textures) {
@@ -310,10 +283,6 @@ function render() {
     
     islandGeometry.attributes.position.needsUpdate = true;
     oceanWater.material.uniforms.time.value -= 1.0 / 5.0;
-
-    //controlsFps.update(1);
-    //controlsOrbit.update();
-    //console.log(camera);
     
     rendererGL.clear();
     
