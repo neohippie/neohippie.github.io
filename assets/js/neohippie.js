@@ -41,13 +41,16 @@ loadTextures(TEXTURE_ASSETS, function(textures) {
 function init() {
     var container = document.getElementById('webgl-container');
         
-    rendererGL = new THREE.WebGLRenderer();
+    rendererGL = new THREE.WebGLRenderer({ alpha: true });
     rendererGL.setPixelRatio(window.devicePixelRatio);
     rendererGL.setSize(window.innerWidth, window.innerHeight);
 
+    rendererGL.setScissorTest(true);
+    rendererGL.setScissor(0, window.innerHeight/2, window.innerWidth, window.innerHeight/2);
+
     container.appendChild(rendererGL.domElement);
 
-    camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.5, 3000000);
+    camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.5, 100000);
 
     lookAtMatrix  = new THREE.Matrix4();
     lookAtInverse = new THREE.Matrix4();
@@ -61,6 +64,7 @@ function init() {
 
 function onWindowResize() {
     rendererGL.setSize(window.innerWidth, window.innerHeight);
+    rendererGL.setScissor(0, window.innerHeight/2, window.innerWidth, window.innerHeight/2);
     
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
