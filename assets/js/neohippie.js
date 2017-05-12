@@ -175,14 +175,23 @@ function buildScene(textures) {
 }
 
 function transformIsland() {
-    var screenLeftPx  = new THREE.Vector2(0                 + (( 0.3*window.innerWidth) - 150), window.innerHeight / ((0.002*window.innerWidth) + 2.5));
-    var screenRightPx = new THREE.Vector2(window.innerWidth - ((-0.3*window.innerWidth) + 150), window.innerHeight / 2                                );
+    // calculate position on screen, in pixels
 
-    var screenLeft  = new THREE.Vector2((screenLeftPx .x/window.innerWidth ) * 2 - 1, 
-                                       -(screenLeftPx .y/window.innerHeight) * 2 + 1);
+    var screenLeftX  = 0                  + (( 0.300*window.innerWidth) - 150);
+    var screenLeftY  = window.innerHeight / (( 0.002*window.innerWidth) +   3);
 
-    var screenRight = new THREE.Vector2((screenRightPx.x/window.innerWidth ) * 2 - 1, 
-                                       -(screenRightPx.y/window.innerHeight) * 2 + 1);
+    var screenRightX = window.innerWidth  - ((-0.300*window.innerWidth) + 150);
+    var screenRightY = window.innerHeight /    2                              ;
+
+    // convert pixels to normalized device coordinates
+
+    var screenLeft  = new THREE.Vector2((screenLeftX /window.innerWidth ) * 2 - 1, 
+                                       -(screenLeftY /window.innerHeight) * 2 + 1);
+
+    var screenRight = new THREE.Vector2((screenRightX/window.innerWidth ) * 2 - 1, 
+                                       -(screenRightY/window.innerHeight) * 2 + 1);
+    
+    // project screen position onto ocean plane
 
     raycaster.setFromCamera(screenLeft , camera);
     var islandLeft  = raycaster.intersectObject(oceanMesh)[0].point;
@@ -192,6 +201,8 @@ function transformIsland() {
 
     islandLeft .applyMatrix4(lookAtMatrix);
     islandRight.applyMatrix4(lookAtMatrix);
+
+    // scale and position island mesh
 
     var islandSize = islandLeft.distanceTo(islandRight);
 
