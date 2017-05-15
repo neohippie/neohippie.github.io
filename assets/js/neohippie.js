@@ -6,6 +6,7 @@ if (!Detector.webgl) {
     Detector.addGetWebGLMessage();
 }
 
+var container;
 var rendererGL, camera;
 var sceneGL, raycaster;
 
@@ -39,18 +40,18 @@ loadTextures(TEXTURE_ASSETS, function(textures) {
 });
 
 function init() {
-    var container = document.getElementById('webgl-container');
+    container = document.getElementById('webgl-container');
         
     rendererGL = new THREE.WebGLRenderer({ alpha: true });
     rendererGL.setPixelRatio(window.devicePixelRatio);
-    rendererGL.setSize(window.innerWidth, window.innerHeight);
+    rendererGL.setSize(container.clientWidth, container.clientHeight);
 
     rendererGL.setScissorTest(true);
-    rendererGL.setScissor(0, window.innerHeight/2, window.innerWidth, window.innerHeight/2);
+    rendererGL.setScissor(0, container.clientHeight/2, container.clientWidth, container.clientHeight/2);
 
     container.appendChild(rendererGL.domElement);
 
-    camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.5, 100000);
+    camera = new THREE.PerspectiveCamera(70, container.clientWidth/container.clientHeight, 0.5, 100000);
 
     lookAtMatrix  = new THREE.Matrix4();
     lookAtInverse = new THREE.Matrix4();
@@ -63,10 +64,10 @@ function init() {
 }
 
 function onWindowResize() {
-    rendererGL.setSize(window.innerWidth, window.innerHeight);
-    rendererGL.setScissor(0, window.innerHeight/2, window.innerWidth, window.innerHeight/2);
+    rendererGL.setSize(container.clientWidth, container.clientHeight);
+    rendererGL.setScissor(0, container.clientHeight/2, container.clientWidth, container.clientHeight/2);
     
-    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.aspect = container.clientWidth/container.clientHeight;
     camera.updateProjectionMatrix();
 
     rendererGL.render(sceneGL, camera);
@@ -181,19 +182,19 @@ function buildScene(textures) {
 function transformIsland() {
     // calculate position on screen, in pixels
 
-    var screenLeftX  = 0                  + (( 0.300*window.innerWidth) - 150);
-    var screenLeftY  = window.innerHeight / (( 0.002*window.innerWidth) +   3);
+    var screenLeftX  = 0                  + (( 0.300*container.clientWidth) - 150);
+    var screenLeftY  = container.clientHeight / (( 0.002*container.clientWidth) +   3);
 
-    var screenRightX = window.innerWidth  - ((-0.300*window.innerWidth) + 150);
-    var screenRightY = window.innerHeight /    2                              ;
+    var screenRightX = container.clientWidth  - ((-0.300*container.clientWidth) + 150);
+    var screenRightY = container.clientHeight /    2                              ;
 
     // convert pixels to normalized device coordinates
 
-    var screenLeft  = new THREE.Vector2((screenLeftX /window.innerWidth ) * 2 - 1, 
-                                       -(screenLeftY /window.innerHeight) * 2 + 1);
+    var screenLeft  = new THREE.Vector2((screenLeftX /container.clientWidth ) * 2 - 1, 
+                                       -(screenLeftY /container.clientHeight) * 2 + 1);
 
-    var screenRight = new THREE.Vector2((screenRightX/window.innerWidth ) * 2 - 1, 
-                                       -(screenRightY/window.innerHeight) * 2 + 1);
+    var screenRight = new THREE.Vector2((screenRightX/container.clientWidth ) * 2 - 1, 
+                                       -(screenRightY/container.clientHeight) * 2 + 1);
     
     // project screen position onto ocean plane
 
