@@ -44,7 +44,7 @@ loadTextures(TEXTURE_ASSETS, function(textures) {
 function init() {
     container = document.getElementById('webgl-container');
         
-    rendererGL = new THREE.WebGLRenderer({ alpha: true });
+    rendererGL = new THREE.WebGLRenderer();
     rendererGL.setPixelRatio(window.devicePixelRatio);
     rendererGL.setSize(container.clientWidth, container.clientHeight, UPDATE_STYLE);
 

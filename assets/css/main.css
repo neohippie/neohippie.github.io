@@ -1,9 +1,5 @@
-html {
+html, body {
 	overflow: hidden;
-}
-
-body {
-	background-color: pink;
 }
 
 #navigation {
@@ -15,7 +11,7 @@ body {
 }
 
 #navigation a {
-	font-size      : 200%;
+	font-size      : 5vw;
 	font-family    : Roboto, sans-serif;
 	font-weight    : bold;
 
@@ -61,4 +57,16 @@ body {
 #webgl-container canvas {
 	width : 100vw;
 	height: 100vh;
+}
+
+footer {
+	width: 100%;
+	bottom: 0px;
+
+	position: absolute;
+	text-align: center;
+
+	font-size  : 10px;
+	font-family: Roboto, sans-serif;
+	color      : white;
 }
