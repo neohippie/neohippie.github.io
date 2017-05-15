@@ -18,7 +18,9 @@ var islandHeightmap;
 var islandGeometry, islandVertices, islandClone;
 var islandMesh;
 
-var THEME_COLOR      = new THREE.Color(0xFEF10C);
+var THEME_COLOR  = new THREE.Color(0xFEF10C);
+var UPDATE_STYLE = false; // don't overwrite canvas CSS
+
 var CAMERA_DIRECTION = new THREE.Vector3(-778, -636, 286);
 
 var HEIGHTMAP_WIDTH  = 256;
@@ -26,7 +28,7 @@ var HEIGHTMAP_HEIGHT = 256;
 
 var WATER_LEVEL = 4000.0;
 var WATER_RATE  = 0.001;
-    
+
 var TEXTURE_ASSETS = [
     { property: 'waterNormals', file: 'assets/textures/waternormals.jpg' }
 ];
@@ -44,7 +46,7 @@ function init() {
         
     rendererGL = new THREE.WebGLRenderer({ alpha: true });
     rendererGL.setPixelRatio(window.devicePixelRatio);
-    rendererGL.setSize(container.clientWidth, container.clientHeight);
+    rendererGL.setSize(container.clientWidth, container.clientHeight, UPDATE_STYLE);
 
     rendererGL.setScissorTest(true);
     rendererGL.setScissor(0, container.clientHeight/2, container.clientWidth, container.clientHeight/2);
@@ -64,7 +66,7 @@ function init() {
 }
 
 function onWindowResize() {
-    rendererGL.setSize(container.clientWidth, container.clientHeight);
+    rendererGL.setSize(container.clientWidth, container.clientHeight, UPDATE_STYLE);
     rendererGL.setScissor(0, container.clientHeight/2, container.clientWidth, container.clientHeight/2);
     
     camera.aspect = container.clientWidth/container.clientHeight;

@@ -57,3 +57,8 @@ body {
 	min-width : 800px;
 	min-height: 600px;
 }
+
+#webgl-container canvas {
+	width : 100vw;
+	height: 100vh;
+}
