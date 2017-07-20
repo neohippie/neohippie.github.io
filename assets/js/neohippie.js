@@ -22,6 +22,7 @@ var THEME_COLOR  = new THREE.Color(0xFEF10C);
 var UPDATE_STYLE = false; // don't overwrite canvas CSS
 
 var CAMERA_DIRECTION = new THREE.Vector3(-778, -636, 286);
+var MIN_WIDTH = 800;
 
 var HEIGHTMAP_WIDTH  = 256;
 var HEIGHTMAP_HEIGHT = 256;
@@ -48,7 +49,7 @@ function init() {
     rendererGL.setPixelRatio(window.devicePixelRatio);
     rendererGL.setSize(container.clientWidth, container.clientHeight, UPDATE_STYLE);
 
-    rendererGL.setScissorTest(true);
+    //rendererGL.setScissorTest(true);
     rendererGL.setScissor(0, container.clientHeight/2, container.clientWidth, container.clientHeight/2);
 
     container.appendChild(rendererGL.domElement);
@@ -73,7 +74,7 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
 
     rendererGL.render(sceneGL, camera);
-    transformIsland();
+    transformIsland(container.clientWidth, container.clientHeight);
 }
 
 function buildScene(textures) {
@@ -146,7 +147,7 @@ function buildScene(textures) {
 
     // city
     
-    var objLoader = new THREE.OBJLoader();
+    /*var objLoader = new THREE.OBJLoader();
     
     objLoader.load('assets/models/la_osm.obj', function(model) {
         model.scale   .set(  10000,  10000,   10000);
@@ -154,7 +155,7 @@ function buildScene(textures) {
         model.rotation.y = -Math.PI * 0.5;
         
         sceneGL.add(model);
-    });
+    });*/
     
     // island
 
@@ -177,26 +178,31 @@ function buildScene(textures) {
     sceneGL.applyMatrix(lookAtInverse);
     rendererGL.render(sceneGL, camera);
 
-    transformIsland();
+    if (container.clientWidth > MIN_WIDTH) {
+        transformIsland(MIN_WIDTH, container.clientHeight);
+    } else {
+        transformIsland(container.clientWidth, container.clientHeight);
+    }
+
     sceneGL.add(islandMesh);
 }
 
-function transformIsland() {
+function transformIsland(width, height) {
     // calculate position on screen, in pixels
 
-    var screenLeftX  = 0                  + (( 0.300*container.clientWidth) - 150);
-    var screenLeftY  = container.clientHeight / (( 0.002*container.clientWidth) +   3);
+    var screenLeftX  = 0      + (( 0.300*width) - 150);
+    var screenLeftY  = height / (( 0.002*width) +   3);
 
-    var screenRightX = container.clientWidth  - ((-0.300*container.clientWidth) + 150);
-    var screenRightY = container.clientHeight /    2                              ;
+    var screenRightX = width  - ((-0.300*width) + 150);
+    var screenRightY = height /    2                  ;
 
     // convert pixels to normalized device coordinates
 
-    var screenLeft  = new THREE.Vector2((screenLeftX /container.clientWidth ) * 2 - 1, 
-                                       -(screenLeftY /container.clientHeight) * 2 + 1);
+    var screenLeft  = new THREE.Vector2((screenLeftX /width ) * 2 - 1, 
+                                       -(screenLeftY /height) * 2 + 1);
 
-    var screenRight = new THREE.Vector2((screenRightX/container.clientWidth ) * 2 - 1, 
-                                       -(screenRightY/container.clientHeight) * 2 + 1);
+    var screenRight = new THREE.Vector2((screenRightX/width ) * 2 - 1, 
+                                       -(screenRightY/height) * 2 + 1);
     
     // project screen position onto ocean plane
 
@@ -212,9 +218,12 @@ function transformIsland() {
     // scale and position island mesh
 
     var islandSize = islandLeft.distanceTo(islandRight);
+    console.log(islandSize);
 
-    islandMesh.scale.x = islandSize;
-    islandMesh.scale.z = islandSize;
+    if (width <= 800) {
+        islandMesh.scale.x = islandSize;
+        islandMesh.scale.z = islandSize;
+    }
 
     islandMesh.position.x = islandLeft.x + islandSize/2;
     islandMesh.position.z = islandLeft.z - islandSize/2;
