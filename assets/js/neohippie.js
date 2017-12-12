@@ -248,7 +248,7 @@ function generateHeightmap(width, height) {
     // neohippie
 
     var rgba = context.getImageData(0, 30, 1, 1).data;
-    var text = 'NEOHIPPIE';
+    var text = 'ABRAHAM';
 
     context.fillStyle = 'rgb(' + (rgba[0]+8) + ', ' + (rgba[1]+8) + ', ' + (rgba[2]+8) + ')';
     context.font      = 'bold 38px Arial';
@@ -257,7 +257,7 @@ function generateHeightmap(width, height) {
     // abraham
 
     rgba = context.getImageData(0, 50, 1, 1).data;
-    text = 'ABRAHAM';
+    text = '#NEOHIPPIE';
 
     context.fillStyle = 'rgb(' + (rgba[0]-16) + ', ' + (rgba[1]-16) + ', ' + (rgba[2]-16) + ')';
     context.font      = 'bold 26px Arial';
