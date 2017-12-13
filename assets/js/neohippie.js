@@ -81,7 +81,7 @@ function buildScene(textures) {
 
     // skybox
     
-    var skyTexture = THREE.ImageUtils.generateDataTexture(1, 1, THEME_COLOR);
+    var skyTexture = THREE.ImageUtils.generateDataTexture(1, 1, new THREE.Color(0x0000FF));
     var skyImages  = Array(6).fill(skyTexture);
     
     var cubeMap = new THREE.CubeTexture(skyImages);
@@ -110,11 +110,11 @@ function buildScene(textures) {
     
     // light
 
-    var sun = new THREE.DirectionalLight(THEME_COLOR, 1);
+    /*var sun = new THREE.DirectionalLight(THEME_COLOR, 1);
     sun.position.set(-21500, 1000, -10000);
     
     sceneGL.add(sun);
-    sceneGL.add(new THREE.AmbientLight(0x444444, 0.3));
+    sceneGL.add(new THREE.AmbientLight(0x444444, 0.3));*/
 
     // ocean
     
@@ -124,7 +124,7 @@ function buildScene(textures) {
         textureWidth : 512,
         textureHeight: 512,
 
-        alpha          : 1.0 ,
+        alpha          : 0.75,
         distortionScale: 50.0,
 
         waterNormals: textures.waterNormals,        
@@ -171,7 +171,7 @@ function buildScene(textures) {
 
     islandClone = islandVertices.slice();
 
-    islandMesh = new THREE.Mesh(islandGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }));
+    islandMesh = new THREE.Mesh(islandGeometry, new THREE.MeshBasicMaterial({ color: 0x00FF00 }));
     islandMesh.rotateY(Math.PI/2);
     islandMesh.translateY(-7000);
 
@@ -238,11 +238,13 @@ function generateHeightmap(width, height) {
 
     // gradient
 
-    var gradient = context.createLinearGradient(0, -width, 0, width*2);
+    /*var gradient = context.createLinearGradient(0, -width, 0, width*2);
     gradient.addColorStop(0, 'black');
     gradient.addColorStop(1, 'white');
 
-    context.fillStyle = gradient;
+    context.fillStyle = gradient;*/
+
+    context.fillStyle = 'rgb(0, 0, 0)';
     context.fillRect(0, 0, width, height);
 
     // neohippie
@@ -250,7 +252,7 @@ function generateHeightmap(width, height) {
     var rgba = context.getImageData(0, 30, 1, 1).data;
     var text = 'ABRAHAM';
 
-    context.fillStyle = 'rgb(' + (rgba[0]+8) + ', ' + (rgba[1]+8) + ', ' + (rgba[2]+8) + ')';
+    context.fillStyle = 'rgb(' + (rgba[0]+96) + ', ' + (rgba[1]+96) + ', ' + (rgba[2]+96) + ')';
     context.font      = 'bold 38px Arial';
     context.fillText(text, width/2 - context.measureText(text).width/2, 30);
 
@@ -259,7 +261,7 @@ function generateHeightmap(width, height) {
     rgba = context.getImageData(0, 50, 1, 1).data;
     text = '#NEOHIPPIE';
 
-    context.fillStyle = 'rgb(' + (rgba[0]-16) + ', ' + (rgba[1]-16) + ', ' + (rgba[2]-16) + ')';
+    context.fillStyle = 'rgb(' + (rgba[0]+91) + ', ' + (rgba[1]+91) + ', ' + (rgba[2]+91) + ')';
     context.font      = 'bold 26px Arial';
     context.fillText(text, width/2 - context.measureText(text).width/2, 50);
 
@@ -304,7 +306,7 @@ function animate() {
 
 function render() {
 
-    simulateTide();
+    //simulateTide();
     
     islandGeometry.attributes.position.needsUpdate = true;
     oceanWater.material.uniforms.time.value -= 1.0 / 5.0;
