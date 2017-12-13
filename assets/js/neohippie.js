@@ -218,7 +218,7 @@ function transformIsland(width, height) {
     // scale and position island mesh
 
     var islandSize = islandLeft.distanceTo(islandRight);
-    console.log(islandSize);
+    //console.log(islandSize);
 
     if (width <= 800) {
         islandMesh.scale.x = islandSize;
