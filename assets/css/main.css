@@ -1,3 +1,7 @@
+* { 
+	box-sizing: border-box; 
+}
+
 html, body {
 	overflow: hidden;
 }
@@ -12,11 +16,10 @@ html, body {
 
 #navigation a {
 	font-size      : 5vw;
-	font-family    : Roboto, sans-serif;
 	font-weight    : bold;
 
 	text-decoration: none;
-	color          : black;
+	color          : white;
 
 	flex   : 1;
 	display: flex;
@@ -27,36 +30,6 @@ html, body {
 
 #navigation a:hover {
 	text-decoration: underline;
-}
-
-#webgl-container {
-	width : 100vw;
-	height: 100vh;
-	min-width : 800px;
-	min-height: 600px;
-}
-
-#webgl-container canvas {
-	width : 100vw;
-	height: 100vh;
-}
-
-#soundcloud-container {
-	width: 100%;
-	bottom:  5%;
-
-	position: absolute;
-}
-
-#soundcloud-widget {
-	width : 50vh;
-	height: 50vh;
-
-	opacity: 0.8;
-	display: block;
-
-	margin-left : auto;
-	margin-right: auto;
 }
 
 footer {
@@ -70,3 +43,45 @@ footer {
 	font-family: Roboto, sans-serif;
 	color      : white;
 }
+
+@font-face {
+	font-family: Moderne Sans;
+	src: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/moderne_sans.woff2)
+}
+  * {
+	box-sizing: border-box;
+  }
+  body {
+	margin: 0;
+	background: #000;
+	background-size: cover;
+  }
+  video { 
+	  position: absolute;
+	  top: 0;
+	  left: 0;
+	  width: 100%;
+	  height: 100%;
+	  object-fit: cover;
+	  object-position: center;
+  }
+@font-face {
+    font-family: 'webfontregular';
+    src: url('shlop-webfont.woff2') format('woff2'),
+         url('shlop-webfont.woff') format('woff'),
+         url('shlop-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+  a { 
+	font-family: 'webfontregular';
+	font-size: 8vmin;
+	text-align: center;
+	margin: 2rem 3rem 0;
+	mix-blend-mode: difference;
+	color: #fff;
+	font-weight: 100;
+  }
+
