@@ -7,8 +7,8 @@
 	font-style : normal;
 }
 
-* { 
-	box-sizing: border-box; 
+* {
+	box-sizing: border-box;
 }
 
 html, body {
@@ -26,8 +26,8 @@ body {
 	margin-top: 10vh;
 
 	position: absolute;
-	display : inline-flex;			
-	
+	display : inline-flex;
+
 	justify-content: space-around;
 }
 
@@ -57,7 +57,7 @@ header {
 	font-size : 12vw;
 }
 
-#background { 
+#background {
 	position: absolute;
 
 	top : 0;
@@ -79,5 +79,5 @@ footer {
 
 	font-size  : 10px;
 	font-family: Roboto, sans-serif;
-	color      : black;
+	color      : white;
 }
